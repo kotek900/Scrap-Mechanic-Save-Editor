@@ -25,6 +25,8 @@ let selected;
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
+let mouseCanSelectObject = false;
+
 function onPointerMove( event ) {
 
 	// calculate pointer position in normalized device coordinates
@@ -33,17 +35,28 @@ function onPointerMove( event ) {
 	pointer.x = ( event.clientX / (window.innerWidth*0.7-10) ) * 2 - 1;
 	pointer.y = - ( (event.clientY-70) / (window.innerHeight - 70) ) * 2 + 1;
 
+    mouseCanSelectObject = false;
+
+}
+
+function onPointerDown( event ) {
+    mouseCanSelectObject = true;
 }
 
 
 
 main_view.children[1].addEventListener( 'pointermove', onPointerMove );
+main_view.children[1].addEventListener( 'pointerdown', onPointerDown );
 
 main_view.children[1].onclick = function() {
     const intersects = raycaster.intersectObjects( scene.children );
 
 
+    if (!mouseCanSelectObject) return;
+
     if (intersects.length==0) return;
+
+    if (intersects[0].object.ChildShapeID==undefined) return;
 
 
     selected = intersects[0];
@@ -125,9 +138,9 @@ class ChildShape {
     const material = new THREE.MeshLambertMaterial( { color: this.color } );
 
     this.mesh = new THREE.Mesh( geometry, material );
-    this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4;
-    this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4;
-    this.mesh.position.x = this.position.z + RigidBodies[this.bodyID].position.x*4;
+    this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4+this.size.x/2;
+    this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4+this.size.y/2;
+    this.mesh.position.x = this.position.z + RigidBodies[this.bodyID].position.x*4+this.size.z/2;
 
     this.mesh.ChildShapeID = this.id;
 
