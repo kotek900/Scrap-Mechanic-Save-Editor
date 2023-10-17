@@ -140,7 +140,7 @@ class ChildShape {
     this.mesh = new THREE.Mesh( geometry, material );
     this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4+this.size.x/2;
     this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4+this.size.y/2;
-    this.mesh.position.x = this.position.z + RigidBodies[this.bodyID].position.x*4+this.size.z/2;
+    this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x*4+this.size.z/2);
 
     this.mesh.ChildShapeID = this.id;
 
@@ -153,8 +153,15 @@ class ChildShape {
     this.bodyID = data[1];
     this.color = data[2][0x28]*0x010000+data[2][0x27]*0x000100+data[2][0x26]*0x000001;
 
+    this.type = "block";
+
     this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
-    this.position = { x: data[2][0x24], y: data[2][0x22], z: data[2][0x20]}
+    this.position = { x: data[2][0x23]*256+data[2][0x24], y: data[2][0x21]*256+data[2][0x22], z: data[2][0x1F]*256+data[2][0x20]}
+
+
+    if (data[2][0x23]>127) this.position.x -= 65536;
+    if (data[2][0x21]>127) this.position.y -= 65536;
+    if (data[2][0x1F]>127) this.position.z -= 65536;
 
 
 
@@ -184,6 +191,12 @@ open_file_button.onchange = () => {
   const f = open_file_button.files[0];
   const r = new FileReader();
   r.onload = function() {
+
+    //remove all objects from the scene
+    while(scene.children.length > 0){
+      scene.remove(scene.children[0]);
+    }
+
     const Uints = new Uint8Array(r.result);
     db = new SQL.Database(Uints);
 
