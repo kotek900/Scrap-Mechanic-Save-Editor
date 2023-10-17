@@ -95,13 +95,6 @@ const SQL = await initSqlJs({
   locateFile: file => `https://sql.js.org/dist/${file}`
 });
 
-const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
-directionalLight.position.x = 2/3;
-directionalLight.position.z = 1/3;
-scene.add( directionalLight );
-
-const light = new THREE.AmbientLight( 0xffffff, 0.5 );
-scene.add( light );
 
 function parseFloat(str) {
   var float = 0, sign, order, mantiss,exp,
@@ -196,6 +189,14 @@ open_file_button.onchange = () => {
     while(scene.children.length > 0){
       scene.remove(scene.children[0]);
     }
+
+    const directionalLight = new THREE.DirectionalLight( 0xffffff, 1.0 );
+    directionalLight.position.x = 2/3;
+    directionalLight.position.z = 1/3;
+    scene.add( directionalLight );
+
+    const light = new THREE.AmbientLight( 0xffffff, 0.5 );
+    scene.add( light );
 
     const Uints = new Uint8Array(r.result);
     db = new SQL.Database(Uints);
