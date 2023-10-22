@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, (window.innerWidth*0.7-10) / (window.innerHeight - 70), 0.1, 1000 );
@@ -45,6 +46,20 @@ function onPointerDown( event ) {
 
 
 
+const loader = new GLTFLoader();
+
+let unknownModel;
+
+loader.load( 'unknown.glb', function ( gltf ) {
+
+	unknownModel = gltf;
+
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+} );
+
 main_view.children[1].addEventListener( 'pointermove', onPointerMove );
 main_view.children[1].addEventListener( 'pointerdown', onPointerDown );
 
@@ -53,6 +68,8 @@ main_view.children[1].onclick = function() {
 
 
     if (!mouseCanSelectObject) return;
+
+    console.log(intersects[0]);
 
     if (intersects.length==0) return;
 
@@ -95,6 +112,9 @@ const SQL = await initSqlJs({
   locateFile: file => `https://sql.js.org/dist/${file}`
 });
 
+scene.background = new THREE.Color(0x7eafec);
+camera.far = 20000;
+
 
 function parseFloat(str) {
   var float = 0, sign, order, mantiss,exp,
@@ -127,17 +147,34 @@ class ChildShape {
     if (this.mesh!=undefined) this.mesh.remove();
 
 
-    const geometry = new THREE.BoxGeometry( this.size.z, this.size.x, this.size.y );
+    let geometry;
+
     const material = new THREE.MeshLambertMaterial( { color: this.color } );
 
-    this.mesh = new THREE.Mesh( geometry, material );
-    this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4+this.size.x/2;
-    this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4+this.size.y/2;
-    this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x*4+this.size.z/2);
+    if (this.type == "block") {
+      geometry = new THREE.BoxGeometry( this.size.z, this.size.x, this.size.y );
+      this.mesh = new THREE.Mesh( geometry, material );
+    } else if (this.type == "part") {
+      this.mesh = unknownModel.scene;
+    }
+
+
+
+    this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4;
+    this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4;
+    this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x*4);
+
+
+
+    if (this.type == "block") {
+      this.mesh.position.y+=this.size.x/2;
+      this.mesh.position.z+=this.size.y/2;
+      this.mesh.position.x-=this.size.z/2;
+    }
 
     this.mesh.ChildShapeID = this.id;
 
-    scene.add(this.mesh);
+    scene.add( this.mesh );
 
   }
   constructor(data) {
@@ -146,9 +183,17 @@ class ChildShape {
     this.bodyID = data[1];
     this.color = data[2][0x28]*0x010000+data[2][0x27]*0x000100+data[2][0x26]*0x000001;
 
-    this.type = "block";
 
-    this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
+    let partType = data[2][1];
+    if (partType == 0x1f) {
+      this.type = "block";
+      this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
+    } else if (partType == 0x20) {
+      this.type = "part";
+      this.rotation = data[2][0x29];
+    }
+
+
     this.position = { x: data[2][0x23]*256+data[2][0x24], y: data[2][0x21]*256+data[2][0x22], z: data[2][0x1F]*256+data[2][0x20]}
 
 
