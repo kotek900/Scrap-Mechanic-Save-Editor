@@ -202,6 +202,10 @@ class ChildShape {
     this.UUID += "-";
     this.UUID += data[2][0x10].toString(16).padStart(2, '0');
     this.UUID += data[2][0x0F].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x0E].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x0D].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x0C].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x0B].toString(16).padStart(2, '0');
 
     let partType = data[2][1];
     if (partType == 0x1f) {
