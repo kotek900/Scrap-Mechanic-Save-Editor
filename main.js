@@ -69,7 +69,6 @@ main_view.children[1].onclick = function() {
 
     if (!mouseCanSelectObject) return;
 
-    console.log(intersects[0]);
 
     if (intersects.length==0) return;
 
@@ -84,8 +83,9 @@ main_view.children[1].onclick = function() {
 
 
 function changeSelection() {
-  info_selected.textContent = selected.object.ChildShapeID;
+  info_selected.textContent = ChildShapes[selected.object.ChildShapeID].type + " ID: " + selected.object.ChildShapeID;
   selected_color_picker.value = "#"+ChildShapes[selected.object.ChildShapeID].color.toString(16).padStart(6, '0');
+  selected_UUID.value = ChildShapes[selected.object.ChildShapeID].UUID;
 }
 
 
@@ -183,6 +183,25 @@ class ChildShape {
     this.bodyID = data[1];
     this.color = data[2][0x28]*0x010000+data[2][0x27]*0x000100+data[2][0x26]*0x000001;
 
+
+    this.UUID = "";
+
+    this.UUID += data[2][0x1A].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x19].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x18].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x17].toString(16).padStart(2, '0');
+    this.UUID += "-";
+    this.UUID += data[2][0x16].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x15].toString(16).padStart(2, '0');
+    this.UUID += "-";
+    this.UUID += data[2][0x14].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x13].toString(16).padStart(2, '0');
+    this.UUID += "-";
+    this.UUID += data[2][0x12].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x11].toString(16).padStart(2, '0');
+    this.UUID += "-";
+    this.UUID += data[2][0x10].toString(16).padStart(2, '0');
+    this.UUID += data[2][0x0F].toString(16).padStart(2, '0');
 
     let partType = data[2][1];
     if (partType == 0x1f) {

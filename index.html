@@ -43,6 +43,9 @@ body {
 canvas {
   float: left;
 }
+#selected_UUID {
+  font: 100% Lucida Console, monospace;
+}
 </style>
 </head>
 <body>
@@ -57,7 +60,8 @@ canvas {
 <div id = "main_view">
 <div id = "tool_menu">
 Selected: <span id = "info_selected">none</span><br>
-<input type="color" id = "selected_color_picker"></input>
+UUID: <input type="text" id = "selected_UUID" size="36" maxlength="36"></input><br>
+Color: <input type="color" id = "selected_color_picker"></input>
 </div>
 </div>
 <script type="importmap">
