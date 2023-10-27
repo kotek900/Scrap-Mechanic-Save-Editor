@@ -1,7 +1,9 @@
+// Import
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// Classes
 
 class ChildShape {
     createMesh() {
@@ -12,7 +14,9 @@ class ChildShape {
 
         let geometry;
 
-        const material = new THREE.MeshLambertMaterial({ color: this.color });
+        const material = new THREE.MeshLambertMaterial({
+            color: this.color
+        });
 
         if (this.type == "block") {
             geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
@@ -23,9 +27,11 @@ class ChildShape {
 
         console.log(this.position.x);
 
+        // Convert to a different coordinate system
         this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z * 4;
         this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y * 4;
-        this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x * 4);
+        this.mesh.position.x = this.position.z + RigidBodies[this.bodyID].position.x * 4;
+        this.mesh.position.x *= -1;
 
         if (this.type == "block") {
             this.mesh.position.y += this.size.x / 2;
@@ -42,49 +48,40 @@ class ChildShape {
         this.data = data;
         this.id = data[0];
         this.bodyID = data[1];
-        this.color = data[2][0x28] * 0x010000 + data[2][0x27] * 0x000100 + data[2][0x26] * 0x000001;
+        this.color = data[2][40] << 16 + data[2][39] << 8 + data[2][38];
 
         this.UUID = "";
-
-        this.UUID += data[2][0x1A].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x19].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x18].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x17].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x16].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x15].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x14].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x13].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x12].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x11].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x10].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0F].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0E].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0D].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0C].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0B].toString(16).padStart(2, '0');
-
+        for (let i = 0; i >= 16; i--) {
+            this.UUID += data[2][26-i].toString(16).padStart(2, '0');
+            if (i === 3 || i === 5 || i === 7 || i === 9) {
+                this.UUID += "-";
+            }
+        }
+        
         let partType = data[2][1];
         if (partType == 0x1f) {
             this.type = "block";
-            this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
+            this.size = {
+                x: data[2][0x2E], 
+                y: data[2][0x2C], 
+                z: data[2][0x2A] 
+            };
         } else if (partType == 0x20) {
             this.type = "part";
-            this.rotation = data[2][0x29];
+            this.rotation = data[2][41];
         }
 
+        // Why is this not just turning it into a short from the start?
+        // This is cursed on so many levels
         this.position = {
-            x: data[2][0x23] * 256 + data[2][0x24], 
-            y: data[2][0x21] * 256 + data[2][0x22], 
-            z: data[2][0x1F] * 256 + data[2][0x20] 
+            x: data[2][35] << 8 + data[2][36], 
+            y: data[2][33] << 8 + data[2][34], 
+            z: data[2][31] << 8 + data[2][32] 
         }
 
-        if (data[2][0x23] > 127) this.position.x -= 65536;
-        if (data[2][0x21] > 127) this.position.y -= 65536;
-        if (data[2][0x1F] > 127) this.position.z -= 65536;
+        if (data[2][35] > 127) this.position.x -= 65536;
+        if (data[2][33] > 127) this.position.y -= 65536;
+        if (data[2][31] > 127) this.position.z -= 65536;
 
         this.createMesh();
     }
@@ -96,6 +93,7 @@ class RigidBody {
         this.id = data[0];
         this.worldID = data[1];
 
+        // TODO: make this readable.
         let floatStringX = "0x";
         let floatStringY = "0x";
         let floatStringZ = "0x";
@@ -123,6 +121,7 @@ class RigidBody {
     }
 }
 
+// Functions
 
 function onPointerMove(event) {
     // calculate pointer position in normalized device coordinates
@@ -213,6 +212,7 @@ function parseFloat(str) {
     return float * sign;
 }
 
+// Main code
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
