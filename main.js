@@ -195,7 +195,7 @@ function parseFloat(str) {
     } else {
         for (var i = str.length - 1; i >= 0; i -= 1) {
             if (str.charCodeAt(i) > 255) {
-                console.log('Wrong string parametr');
+                console.log('Wrong string parameter');
                 return false;
             }
             int += str.charCodeAt(i) * multi;
