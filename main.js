@@ -2,28 +2,127 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
-main_view.appendChild(renderer.domElement);
+class ChildShape {
+    createMesh() {
+        if (this.mesh != undefined) {
+            scene.remove(this.mesh);
+            this.mesh.remove();
+        }
 
-const controls = new OrbitControls(camera, renderer.domElement);
+        let geometry;
 
-camera.position.z = 5;
+        const material = new THREE.MeshLambertMaterial({ color: this.color });
 
-let db;
+        if (this.type == "block") {
+            geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
+            this.mesh = new THREE.Mesh(geometry, material);
+        } else if (this.type == "part") {
+            this.mesh = unknownModel.scene;
+        }
 
-let ChildShapes = [];
-let RigidBodies = [];
+        console.log(this.position.x);
 
-let selected;
+        this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z * 4;
+        this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y * 4;
+        this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x * 4);
 
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
+        if (this.type == "block") {
+            this.mesh.position.y += this.size.x / 2;
+            this.mesh.position.z += this.size.y / 2;
+            this.mesh.position.x -= this.size.z / 2;
+        }
 
-let mouseCanSelectObject = false;
+        this.mesh.ChildShapeID = this.id;
+
+        scene.add(this.mesh);
+    }
+    
+    constructor(data) {
+        this.data = data;
+        this.id = data[0];
+        this.bodyID = data[1];
+        this.color = data[2][0x28] * 0x010000 + data[2][0x27] * 0x000100 + data[2][0x26] * 0x000001;
+
+        this.UUID = "";
+
+        this.UUID += data[2][0x1A].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x19].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x18].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x17].toString(16).padStart(2, '0');
+        this.UUID += "-";
+        this.UUID += data[2][0x16].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x15].toString(16).padStart(2, '0');
+        this.UUID += "-";
+        this.UUID += data[2][0x14].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x13].toString(16).padStart(2, '0');
+        this.UUID += "-";
+        this.UUID += data[2][0x12].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x11].toString(16).padStart(2, '0');
+        this.UUID += "-";
+        this.UUID += data[2][0x10].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x0F].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x0E].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x0D].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x0C].toString(16).padStart(2, '0');
+        this.UUID += data[2][0x0B].toString(16).padStart(2, '0');
+
+        let partType = data[2][1];
+        if (partType == 0x1f) {
+            this.type = "block";
+            this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
+        } else if (partType == 0x20) {
+            this.type = "part";
+            this.rotation = data[2][0x29];
+        }
+
+        this.position = {
+            x: data[2][0x23] * 256 + data[2][0x24], 
+            y: data[2][0x21] * 256 + data[2][0x22], 
+            z: data[2][0x1F] * 256 + data[2][0x20] 
+        }
+
+        if (data[2][0x23] > 127) this.position.x -= 65536;
+        if (data[2][0x21] > 127) this.position.y -= 65536;
+        if (data[2][0x1F] > 127) this.position.z -= 65536;
+
+        this.createMesh();
+    }
+}
+
+class RigidBody {
+    constructor(data) {
+        this.data = data;
+        this.id = data[0];
+        this.worldID = data[1];
+
+        let floatStringX = "0x";
+        let floatStringY = "0x";
+        let floatStringZ = "0x";
+        floatStringX = floatStringX + 
+            data[2][0x2B].toString(16).padStart(2, '0') + 
+            data[2][0x2C].toString(16).padStart(2, '0') + 
+            data[2][0x2D].toString(16).padStart(2, '0') + 
+            data[2][0x2E].toString(16).padStart(2, '0');
+        floatStringY = floatStringY + 
+            data[2][0x2F].toString(16).padStart(2, '0') + 
+            data[2][0x30].toString(16).padStart(2, '0') + 
+            data[2][0x31].toString(16).padStart(2, '0') + 
+            data[2][0x32].toString(16).padStart(2, '0');
+        floatStringZ = floatStringZ + 
+            data[2][0x33].toString(16).padStart(2, '0') + 
+            data[2][0x34].toString(16).padStart(2, '0') + 
+            data[2][0x35].toString(16).padStart(2, '0') + 
+            data[2][0x36].toString(16).padStart(2, '0');
+
+        this.position = {
+            x: parseFloat(floatStringX), 
+            y: parseFloat(floatStringY), 
+            z: parseFloat(floatStringZ) 
+        }
+    }
+}
+
 
 function onPointerMove(event) {
     // calculate pointer position in normalized device coordinates
@@ -33,47 +132,17 @@ function onPointerMove(event) {
     pointer.y = -((event.clientY - 70) / (window.innerHeight - 70)) * 2 + 1;
 
     mouseCanSelectObject = false;
-
 }
 
 function onPointerDown(event) {
     mouseCanSelectObject = true;
 }
 
-window.addEventListener('resize', onWindowResize);
-
 function onWindowResize() {
     camera.aspect = (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70);
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
-}
-
-const loader = new GLTFLoader();
-
-let unknownModel;
-
-loader.load('unknown.glb', function(gltf) {
-
-    unknownModel = gltf;
-
-}, undefined, function(error) {
-
-    console.error(error);
-
-});
-
-main_view.children[1].addEventListener('pointermove', onPointerMove);
-main_view.children[1].addEventListener('pointerdown', onPointerDown);
-
-main_view.children[1].onclick = function() {
-    const intersects = raycaster.intersectObjects(scene.children);
-    if (!mouseCanSelectObject) return;
-    if (intersects.length == 0) return;
-    if (intersects[0].object.ChildShapeID == undefined) return;
-
-    selected = intersects[0];
-    changeSelection();
 }
 
 function changeSelection() {
@@ -116,15 +185,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-animate();
-
-const SQL = await initSqlJs({
-    locateFile: file => `https://sql.js.org/dist/${file}`
-});
-
-scene.background = new THREE.Color(0x7eafec);
-camera.far = 20000;
-
 function parseFloat(str) {
     var float = 0,
         sign, order, mantiss, exp,
@@ -153,119 +213,68 @@ function parseFloat(str) {
     return float * sign;
 }
 
-class ChildShape {
-    createMesh() {
 
-        if (this.mesh != undefined) {
-            scene.remove(this.mesh);
-            this.mesh.remove();
-        }
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
 
-        let geometry;
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
+main_view.appendChild(renderer.domElement);
 
-        const material = new THREE.MeshLambertMaterial({ color: this.color });
+const controls = new OrbitControls(camera, renderer.domElement);
 
-        if (this.type == "block") {
-            geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
-            this.mesh = new THREE.Mesh(geometry, material);
-        } else if (this.type == "part") {
-            this.mesh = unknownModel.scene;
-        }
+camera.position.z = 5;
 
-        console.log(this.position.x);
+let db;
 
-        this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z * 4;
-        this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y * 4;
-        this.mesh.position.x = -(this.position.z + RigidBodies[this.bodyID].position.x * 4);
+let ChildShapes = [];
+let RigidBodies = [];
 
-        if (this.type == "block") {
-            this.mesh.position.y += this.size.x / 2;
-            this.mesh.position.z += this.size.y / 2;
-            this.mesh.position.x -= this.size.z / 2;
-        }
+let selected;
 
-        this.mesh.ChildShapeID = this.id;
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
-        scene.add(this.mesh);
+let mouseCanSelectObject = false;
 
+window.addEventListener('resize', onWindowResize);
+
+const loader = new GLTFLoader();
+
+let unknownModel;
+
+loader.load(
+    'unknown.glb', 
+    function(gltf) {
+        unknownModel = gltf;
+    }, 
+    undefined, 
+    function(error) {
+        console.error(error);
     }
-    constructor(data) {
-        this.data = data;
-        this.id = data[0];
-        this.bodyID = data[1];
-        this.color = data[2][0x28] * 0x010000 + data[2][0x27] * 0x000100 + data[2][0x26] * 0x000001;
+);
 
-        this.UUID = "";
+main_view.children[1].addEventListener('pointermove', onPointerMove);
+main_view.children[1].addEventListener('pointerdown', onPointerDown);
 
-        this.UUID += data[2][0x1A].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x19].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x18].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x17].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x16].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x15].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x14].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x13].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x12].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x11].toString(16).padStart(2, '0');
-        this.UUID += "-";
-        this.UUID += data[2][0x10].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0F].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0E].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0D].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0C].toString(16).padStart(2, '0');
-        this.UUID += data[2][0x0B].toString(16).padStart(2, '0');
+main_view.children[1].onclick = function() {
+    const intersects = raycaster.intersectObjects(scene.children);
+    if (!mouseCanSelectObject) return;
+    if (intersects.length == 0) return;
+    if (intersects[0].object.ChildShapeID == undefined) return;
 
-        let partType = data[2][1];
-        if (partType == 0x1f) {
-            this.type = "block";
-            this.size = { x: data[2][0x2E], y: data[2][0x2C], z: data[2][0x2A] };
-        } else if (partType == 0x20) {
-            this.type = "part";
-            this.rotation = data[2][0x29];
-        }
-
-        this.position = { x: data[2][0x23] * 256 + data[2][0x24], y: data[2][0x21] * 256 + data[2][0x22], z: data[2][0x1F] * 256 + data[2][0x20] }
-
-        if (data[2][0x23] > 127) this.position.x -= 65536;
-        if (data[2][0x21] > 127) this.position.y -= 65536;
-        if (data[2][0x1F] > 127) this.position.z -= 65536;
-
-        this.createMesh();
-    }
+    selected = intersects[0];
+    changeSelection();
 }
 
-class RigidBody {
-    constructor(data) {
-        this.data = data;
-        this.id = data[0];
-        this.worldID = data[1];
+animate();
 
-        let floatStringX = "0x";
-        let floatStringY = "0x";
-        let floatStringZ = "0x";
-        floatStringX = floatStringX + data[2][0x2B].toString(16)
-            .padStart(2, '0') + data[2][0x2C].toString(16)
-            .padStart(2, '0') + data[2][0x2D].toString(16)
-            .padStart(2, '0') + data[2][0x2E].toString(16)
-            .padStart(2, '0');
-        floatStringY = floatStringY + data[2][0x2F].toString(16)
-            .padStart(2, '0') + data[2][0x30].toString(16)
-            .padStart(2, '0') + data[2][0x31].toString(16)
-            .padStart(2, '0') + data[2][0x32].toString(16)
-            .padStart(2, '0');
-        floatStringZ = floatStringZ + data[2][0x33].toString(16)
-            .padStart(2, '0') + data[2][0x34].toString(16)
-            .padStart(2, '0') + data[2][0x35].toString(16)
-            .padStart(2, '0') + data[2][0x36].toString(16)
-            .padStart(2, '0');
+const SQL = await initSqlJs({
+    locateFile: file => `https://sql.js.org/dist/${file}`
+});
 
-        this.position = { x: parseFloat(floatStringX), y: parseFloat(floatStringY), z: parseFloat(floatStringZ) }
-
-    }
-}
+scene.background = new THREE.Color(0x7eafec);
+camera.far = 20000;
 
 
 open_file_button.onchange = () => {
