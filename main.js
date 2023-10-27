@@ -44,6 +44,16 @@ function onPointerDown( event ) {
     mouseCanSelectObject = true;
 }
 
+window.addEventListener( 'resize', onWindowResize );
+
+function onWindowResize() {
+
+  camera.aspect = (window.innerWidth*0.7-10) / (window.innerHeight - 70);
+  camera.updateProjectionMatrix();
+
+  renderer.setSize( window.innerWidth*0.7-10, window.innerHeight - 70 );
+
+}
 
 
 const loader = new GLTFLoader();
@@ -86,6 +96,10 @@ function changeSelection() {
   info_selected.textContent = ChildShapes[selected.object.ChildShapeID].type + " ID: " + selected.object.ChildShapeID;
   selected_color_picker.value = "#"+ChildShapes[selected.object.ChildShapeID].color.toString(16).padStart(6, '0');
   selected_UUID.value = ChildShapes[selected.object.ChildShapeID].UUID;
+
+  input_position_x.value = ChildShapes[selected.object.ChildShapeID].position.x;
+  input_position_y.value = ChildShapes[selected.object.ChildShapeID].position.y;
+  input_position_z.value = ChildShapes[selected.object.ChildShapeID].position.z;
 }
 
 
@@ -93,6 +107,19 @@ selected_color_picker.addEventListener('input', function (evt) {
     ChildShapes[selected.object.ChildShapeID].color = parseInt(selected_color_picker.value.slice(1),16);
 
   ChildShapes[selected.object.ChildShapeID].createMesh();
+});
+
+input_position_x.addEventListener('input', function (evt) {
+   ChildShapes[selected.object.ChildShapeID].position.x = Math.floor(input_position_x.value*1);
+   ChildShapes[selected.object.ChildShapeID].createMesh();
+});
+input_position_y.addEventListener('input', function (evt) {
+   ChildShapes[selected.object.ChildShapeID].position.y = Math.floor(input_position_y.value*1);
+   ChildShapes[selected.object.ChildShapeID].createMesh();
+});
+input_position_z.addEventListener('input', function (evt) {
+   ChildShapes[selected.object.ChildShapeID].position.z = Math.floor(input_position_z.value*1);
+   ChildShapes[selected.object.ChildShapeID].createMesh();
 });
 
 
@@ -144,7 +171,10 @@ function parseFloat(str) {
 class ChildShape {
   createMesh() {
 
-    if (this.mesh!=undefined) this.mesh.remove();
+    if (this.mesh!=undefined) {
+      scene.remove(this.mesh);
+      this.mesh.remove();
+    }
 
 
     let geometry;
@@ -158,7 +188,7 @@ class ChildShape {
       this.mesh = unknownModel.scene;
     }
 
-
+    console.log(this.position.x);
 
     this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z*4;
     this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y*4;
