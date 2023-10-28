@@ -65,7 +65,7 @@ class ChildShape {
         let signX = 1;
         let signY = 1;
         let signZ = 1;
-        let position = this.position;
+        let position = { x: this.position.x, y: this.position.y, z: this.position.z }; //this has to be this way because of JavaScript
         if (this.position.x<0) {
             signX = -1;
             position.x += 65536;
