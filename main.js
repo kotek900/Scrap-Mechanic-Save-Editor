@@ -25,8 +25,6 @@ class ChildShape {
             this.mesh = unknownModel.scene;
         }
 
-        console.log(this.position.x);
-
         // Convert to a different coordinate system
         this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z * 4;
         this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y * 4;
@@ -43,9 +41,61 @@ class ChildShape {
 
         scene.add(this.mesh);
     }
+
+    updateDatabase() {
+        //partType
+        if (this.type == "block") this.data[1] = 0x1f;
+        if (this.type == "part") this.data[1] = 0x20;
+
+        //color
+        let color = this.color
+        let blue = color%256;
+        color = (color-blue)/256;
+        let green = color%256;
+        color = (color-green)/256;
+        let red = color;
+
+        this.data[40] = red;
+        this.data[39] = green;
+        this.data[38] = blue;
+
+        //UUID TODO
+
+        //position
+        let signX = 1;
+        let signY = 1;
+        let signZ = 1;
+        let position = this.position;
+        if (this.position.x<0) {
+            signX = -1;
+            position.x += 65536;
+        }
+        if (this.position.y<0) {
+            signY = -1;
+            position.y += 65536;
+        }
+        if (this.position.z<0) {
+            signZ = -1;
+            position.z += 65536;
+        }
+
+        this.data[36]=position.x%256;
+        this.data[35]=(position.x-position.x%256)/256;
+
+        this.data[34]=position.y%256;
+        this.data[33]=(position.y-position.y%256)/256;
+
+        this.data[32]=position.z%256;
+        this.data[31]=(position.z-position.z%256)/256;
+
+        //size/rotation TODO
+
+        let statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
+        statement.run([this.data, this.id]);
+    }
     
     constructor(data) {
-        this.data = data;
+        this.data = data[2];
         this.id = data[0];
         this.bodyID = data[1];
         this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
@@ -89,7 +139,7 @@ class ChildShape {
 
 class RigidBody {
     constructor(data) {
-        this.data = data;
+        this.data = data[2];
         this.id = data[0];
         this.worldID = data[1];
 
@@ -154,6 +204,21 @@ function changeSelection() {
     input_position_y.value = ChildShapes[selected.object.ChildShapeID].position.y;
     input_position_z.value = ChildShapes[selected.object.ChildShapeID].position.z;
 }
+
+//update the save file
+save_file_button.addEventListener('mouseenter', function(evt) {
+
+    if (db==undefined) return;
+
+    ChildShapes[selected.object.ChildShapeID].updateDatabase();
+
+    let data = db.export();
+    let dataBlob = new Blob([data]);
+    let url = URL.createObjectURL(dataBlob);
+    save_file_link.href = url;
+});
+
+//TODO: add UUID Event Listener to update the UUID
 
 selected_color_picker.addEventListener('input', function(evt) {
     ChildShapes[selected.object.ChildShapeID].color = parseInt(selected_color_picker.value.slice(1), 16);
@@ -263,6 +328,7 @@ main_view.children[1].onclick = function() {
     if (intersects.length == 0) return;
     if (intersects[0].object.ChildShapeID == undefined) return;
 
+    if (selected!=undefined) ChildShapes[selected.object.ChildShapeID].updateDatabase();
     selected = intersects[0];
     changeSelection();
 }

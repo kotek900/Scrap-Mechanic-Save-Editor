@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
@@ -11,6 +12,7 @@
             <div id="info_gameversion">Version: </div>
             <div id="info_seed">Seed: </div>
             <div id="info_gametick">Tick: </div>
+            <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
         </div>
         <div id="main_view">
             <div id="tool_menu">
@@ -18,7 +20,7 @@
                 <br> UUID:
                 <input type="text" id="selected_UUID" size="36" maxlength="36"></input>
                 <br> Color: <input type="color" id="selected_color_picker"></input>
-                <br> Position:
+                <br> Realative position:
                 <br> z: <input type="number" id="input_position_x"></input>
                 <br> y: <input type="number" id="input_position_y"></input>
                 <br> x: <input type="number" id="input_position_z"></input>

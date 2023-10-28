@@ -29,6 +29,12 @@ body {
     font-size: 20px;
 }
 
+#save_file_button {
+  float: right;
+  height: 100%;
+  aspect-ratio: 1;
+}
+
 #main_view { }
 
 #tool_menu {
