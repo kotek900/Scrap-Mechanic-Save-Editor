@@ -1,82 +1,34 @@
 <!DOCTYPE html>
 <html>
-<head>
-<style>
-body {
-    margin: 0px;
-}
-#top_bar {
-    background-color: #1aa3e8;
-    color: black;
-    width: 100%;
-    padding: 10px;
-    margin: 0px;
-    height: 70px;
-    font-size: 25px;
-    box-sizing: border-box;
-}
-#top_bar div {
-    float: left;
-    margin: 5px;
-    background: #106590;
-    color: white;
-    height: calc(100% - 10px);
-    padding: 5px;
-    border-radius: 2px;
-    width: 300px;
-    margin-top: 0px;
-}
-#open_file_button {
-    font-size: 20px;
-}
-#main_view {
-}
-#tool_menu {
-  background-color: #3a393e;
-  color: white;
-  width: 30%;
-  height: calc(100vh - 80px);
-  margin: 0 auto;
-  float: right;
-  padding: 5px;
-}
-canvas {
-  float: left;
-}
-#selected_UUID {
-  font: 100% Lucida Console, monospace;
-}
-</style>
-</head>
-<body>
-<div id = "top_bar">
-<div id = "file_controls">
-<input type = "file" id = "open_file_button"></input>
-</div>
-<div id = "info_gameversion">Version: </div>
-<div id = "info_seed">Seed: </div>
-<div id = "info_gametick">Tick: </div>
-</div>
-<div id = "main_view">
-<div id = "tool_menu">
-Selected: <span id = "info_selected">none</span><br>
-UUID: <input type="text" id = "selected_UUID" size="36" maxlength="36"></input><br>
-Color: <input type="color" id = "selected_color_picker"></input><br>
-Position:<br>
-z: <input type="number" id = "input_position_x"></input><br>
-y: <input type="number" id = "input_position_y"></input><br>
-x: <input type="number" id = "input_position_z"></input><br>
-</div>
-</div>
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/"
-    }
-  }
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-<script src="main.js" type="module"></script>
-</body>
+    <head>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div id="top_bar">
+            <div id="file_controls">
+                <input type="file" id="open_file_button"></input>
+            </div>
+            <div id="info_gameversion">Version: </div>
+            <div id="info_seed">Seed: </div>
+            <div id="info_gametick">Tick: </div>
+        </div>
+        <div id="main_view">
+            <div id="tool_menu">
+                Selected: <span id="info_selected">none</span>
+                <br> UUID:
+                <input type="text" id="selected_UUID" size="36" maxlength="36"></input>
+                <br> Color: <input type="color" id="selected_color_picker"></input>
+                <br> Position:
+                <br> z: <input type="number" id="input_position_x"></input>
+                <br> y: <input type="number" id="input_position_y"></input>
+                <br> x: <input type="number" id="input_position_z"></input>
+                <br>
+            </div>
+        </div>
+        <script type="importmap">
+            { "imports": { "three": "https://unpkg.com/three@0.157.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/" } }
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+        <script src="main.js" type="module"></script>
+    </body>
 </html>
