@@ -48,10 +48,10 @@ class ChildShape {
         this.data = data;
         this.id = data[0];
         this.bodyID = data[1];
-        this.color = data[2][40] << 16 + data[2][39] << 8 + data[2][38];
+        this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
 
         this.UUID = "";
-        for (let i = 0; i >= 16; i--) {
+        for (let i = 0; i < 16; i++) {
             this.UUID += data[2][26-i].toString(16).padStart(2, '0');
             if (i === 3 || i === 5 || i === 7 || i === 9) {
                 this.UUID += "-";
@@ -74,9 +74,9 @@ class ChildShape {
         // Why is this not just turning it into a short from the start?
         // This is cursed on so many levels
         this.position = {
-            x: data[2][35] << 8 + data[2][36], 
-            y: data[2][33] << 8 + data[2][34], 
-            z: data[2][31] << 8 + data[2][32] 
+            x: (data[2][35] << 8) + data[2][36], 
+            y: (data[2][33] << 8) + data[2][34], 
+            z: (data[2][31] << 8) + data[2][32] 
         }
 
         if (data[2][35] > 127) this.position.x -= 65536;
