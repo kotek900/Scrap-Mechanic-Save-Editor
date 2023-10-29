@@ -26,9 +26,9 @@ class ChildShape {
         }
 
         // Convert to a different coordinate system
-        this.mesh.position.y = this.position.x + RigidBodies[this.bodyID].position.z * 4;
-        this.mesh.position.z = this.position.y + RigidBodies[this.bodyID].position.y * 4;
-        this.mesh.position.x = this.position.z + RigidBodies[this.bodyID].position.x * 4;
+        this.mesh.position.y = this.position.x;
+        this.mesh.position.z = this.position.y;
+        this.mesh.position.x = this.position.z;
         this.mesh.position.x *= -1;
 
         if (this.type == "block") {
@@ -39,7 +39,7 @@ class ChildShape {
 
         this.mesh.ChildShapeID = this.id;
 
-        scene.add(this.mesh);
+        RigidBodies[this.bodyID].group.add(this.mesh);
     }
 
     updateDatabase() {
@@ -168,6 +168,13 @@ class RigidBody {
             y: parseFloat(floatStringY), 
             z: parseFloat(floatStringZ) 
         }
+
+        this.group = new THREE.Group();
+
+        //set position and transfrom to a different coordinate system
+        this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
+
+        scene.add(this.group);
     }
 }
 
