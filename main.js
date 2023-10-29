@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 class ChildShape {
     createMesh() {
         if (this.mesh != undefined) {
-            scene.remove(this.mesh);
+            RigidBodies[this.bodyID].group.remove(this.mesh);
             this.mesh.remove();
         }
 
