@@ -22,14 +22,13 @@ class ChildShape {
             geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
             this.mesh = new THREE.Mesh(geometry, material);
         } else if (this.type == "part") {
-            this.mesh = unknownModel.scene;
+            this.mesh = unknownModel.scene.clone();
         }
 
         // Convert to a different coordinate system
         this.mesh.position.y = this.position.x;
         this.mesh.position.z = this.position.y;
-        this.mesh.position.x = this.position.z;
-        this.mesh.position.x *= -1;
+        this.mesh.position.x = -this.position.z;
 
         if (this.type == "block") {
             this.mesh.position.y += this.size.x / 2;
@@ -169,10 +168,53 @@ class RigidBody {
             z: parseFloat(floatStringZ) 
         }
 
+
+        let floatStringQA = "0x";
+        let floatStringQB = "0x";
+        let floatStringQC = "0x";
+        let floatStringQD = "0x";
+        floatStringQA = floatStringQA +
+            data[2][27].toString(16).padStart(2, '0') +
+            data[2][28].toString(16).padStart(2, '0') +
+            data[2][29].toString(16).padStart(2, '0') +
+            data[2][30].toString(16).padStart(2, '0');
+        floatStringQB = floatStringQB +
+            data[2][31].toString(16).padStart(2, '0') +
+            data[2][32].toString(16).padStart(2, '0') +
+            data[2][33].toString(16).padStart(2, '0') +
+            data[2][34].toString(16).padStart(2, '0');
+        floatStringQC = floatStringQC +
+            data[2][35].toString(16).padStart(2, '0') +
+            data[2][36].toString(16).padStart(2, '0') +
+            data[2][37].toString(16).padStart(2, '0') +
+            data[2][38].toString(16).padStart(2, '0');
+        floatStringQD = floatStringQD +
+            data[2][39].toString(16).padStart(2, '0') +
+            data[2][40].toString(16).padStart(2, '0') +
+            data[2][41].toString(16).padStart(2, '0') +
+            data[2][42].toString(16).padStart(2, '0');
+
+        let QA = parseFloat(floatStringQA);
+        let QB = parseFloat(floatStringQB);
+        let QC = parseFloat(floatStringQC);
+        let QD = parseFloat(floatStringQD);
+
+        this.rotation = { a: QA, b: QB, c: QC, d: QD };
+
+
         this.group = new THREE.Group();
 
-        //set position and transfrom to a different coordinate system
         this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
+        this.group.quaternion.set(QB, QC, QD, QA);
+
+        let rotationX = this.group.rotation.x;
+        let rotationY = this.group.rotation.y;
+        let rotationZ = this.group.rotation.z;
+
+        // ??? this works (at least during testing) for some reason
+        if (rotationX>-Math.PI) this.group.rotation.set((rotationZ-Math.PI)%Math.PI,(-rotationX)%Math.PI,rotationY);
+        else this.group.rotation.set((rotationZ-Math.PI)%Math.PI,(-rotationX)%Math.PI,rotationY+Math.PI/2);
+
 
         scene.add(this.group);
     }
@@ -257,6 +299,7 @@ function animate() {
 }
 
 function parseFloat(str) {
+    if (str=="0x00000000") return 0; //floating point error
     var float = 0,
         sign, order, mantiss, exp,
         int = 0,
