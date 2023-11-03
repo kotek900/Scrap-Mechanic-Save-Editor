@@ -199,9 +199,6 @@ class RigidBody {
         let QC = parseFloat(floatStringQC);
         let QD = parseFloat(floatStringQD);
 
-        this.rotation = { a: QA, b: QB, c: QC, d: QD };
-
-
         this.group = new THREE.Group();
 
         this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
@@ -211,16 +208,50 @@ class RigidBody {
         let rotationY = this.group.rotation.y;
         let rotationZ = this.group.rotation.z;
 
-        // ??? this works (at least during testing) for some reason
-        if (rotationX>-Math.PI) this.group.rotation.set((rotationZ-Math.PI)%Math.PI,(-rotationX)%Math.PI,rotationY);
-        else this.group.rotation.set((rotationZ-Math.PI)%Math.PI,(-rotationX)%Math.PI,rotationY+Math.PI/2);
+        this.rotation = { x: rotationX, y: rotationY, z: rotationZ };
 
+        this.group.rotation.set(0,0,0);
+
+        if (!(rotationX==0&&rotationY==0&&rotationZ==0)) {
+
+            let axis = new THREE.Vector3(0, 1, 0);
+            this.group.rotateOnWorldAxis(axis, -rotationX);
+
+            axis = new THREE.Vector3(0, 0, 1);
+            this.group.rotateOnWorldAxis(axis, rotationY);
+
+            axis = new THREE.Vector3(1, 0, 0);
+            this.group.rotateOnWorldAxis(axis, rotationZ+Math.PI);
+
+        }
 
         scene.add(this.group);
     }
 }
 
 // Functions
+
+function select(object) {
+    deselect();
+
+    selected = object;
+
+    info_selected.textContent = ChildShapes[selected.object.ChildShapeID].type + " ID: " + selected.object.ChildShapeID;
+    selected_color_picker.value = "#" + ChildShapes[selected.object.ChildShapeID].color.toString(16)
+        .padStart(6, '0');
+    selected_UUID.value = ChildShapes[selected.object.ChildShapeID].UUID;
+
+    input_position_x.value = ChildShapes[selected.object.ChildShapeID].position.x;
+    input_position_y.value = ChildShapes[selected.object.ChildShapeID].position.y;
+    input_position_z.value = ChildShapes[selected.object.ChildShapeID].position.z;
+}
+
+function deselect() {
+    if (selected!=undefined && selected!=null) {
+        ChildShapes[selected.object.ChildShapeID].updateDatabase();
+    }
+    selected = null;
+}
 
 function onPointerMove(event) {
     // calculate pointer position in normalized device coordinates
@@ -243,22 +274,13 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
 }
 
-function changeSelection() {
-    info_selected.textContent = ChildShapes[selected.object.ChildShapeID].type + " ID: " + selected.object.ChildShapeID;
-    selected_color_picker.value = "#" + ChildShapes[selected.object.ChildShapeID].color.toString(16)
-        .padStart(6, '0');
-    selected_UUID.value = ChildShapes[selected.object.ChildShapeID].UUID;
-
-    input_position_x.value = ChildShapes[selected.object.ChildShapeID].position.x;
-    input_position_y.value = ChildShapes[selected.object.ChildShapeID].position.y;
-    input_position_z.value = ChildShapes[selected.object.ChildShapeID].position.z;
-}
 
 //update the save file
 save_file_button.addEventListener('mouseenter', function(evt) {
 
     if (db==undefined) return;
 
+    //update DB for selected objects
     ChildShapes[selected.object.ChildShapeID].updateDatabase();
 
     let data = db.export();
@@ -378,9 +400,7 @@ main_view.children[1].onclick = function() {
     if (intersects.length == 0) return;
     if (intersects[0].object.ChildShapeID == undefined) return;
 
-    if (selected!=undefined) ChildShapes[selected.object.ChildShapeID].updateDatabase();
-    selected = intersects[0];
-    changeSelection();
+    select(intersects[0]);
 }
 
 animate();
