@@ -5,6 +5,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // Classes
 
+class selection {
+    constructor(type, objectID) {
+        this.type = type;
+        this.objectID = objectID;
+    }
+}
+
 class ChildShape {
     createMesh() {
         if (this.mesh != undefined) {
@@ -231,26 +238,31 @@ class RigidBody {
 
 // Functions
 
-function select(object) {
+function select(type, objectID) {
     deselect();
 
-    selected = object;
+    if (type=="ChildShape") {
+        selected = new selection(type, objectID);
 
-    info_selected.textContent = ChildShapes[selected.object.ChildShapeID].type + " ID: " + selected.object.ChildShapeID;
-    selected_color_picker.value = "#" + ChildShapes[selected.object.ChildShapeID].color.toString(16)
-        .padStart(6, '0');
-    selected_UUID.value = ChildShapes[selected.object.ChildShapeID].UUID;
+        info_selected.textContent = ChildShapes[objectID].type + " ID: " + objectID;
+        selected_color_picker.value = "#" + ChildShapes[objectID].color.toString(16).padStart(6, '0');
+        selected_UUID.value = ChildShapes[objectID].UUID;
 
-    input_position_x.value = ChildShapes[selected.object.ChildShapeID].position.x;
-    input_position_y.value = ChildShapes[selected.object.ChildShapeID].position.y;
-    input_position_z.value = ChildShapes[selected.object.ChildShapeID].position.z;
+        input_position_x.value = ChildShapes[objectID].position.x;
+        input_position_y.value = ChildShapes[objectID].position.y;
+        input_position_z.value = ChildShapes[objectID].position.z;
+    }
 }
 
 function deselect() {
-    if (selected!=undefined && selected!=null) {
-        ChildShapes[selected.object.ChildShapeID].updateDatabase();
+    if (selected.type=="ChildShape") {
+        ChildShapes[selected.objectID].updateDatabase();
+        if (ChildShapes[selected.objectID].type=="block") {
+            //reset the color
+            ChildShapes[selected.objectID].mesh.material.color = new THREE.Color(ChildShapes[selected.objectID].color);
+        }
     }
-    selected = null;
+    selected = new selection("none", 0);
 }
 
 function onPointerMove(event) {
@@ -281,7 +293,7 @@ save_file_button.addEventListener('mouseenter', function(evt) {
     if (db==undefined) return;
 
     //update DB for selected objects
-    ChildShapes[selected.object.ChildShapeID].updateDatabase();
+    ChildShapes[selected.objectID].updateDatabase();
 
     let data = db.export();
     let dataBlob = new Blob([data]);
@@ -292,23 +304,27 @@ save_file_button.addEventListener('mouseenter', function(evt) {
 //TODO: add UUID Event Listener to update the UUID
 
 selected_color_picker.addEventListener('input', function(evt) {
-    ChildShapes[selected.object.ChildShapeID].color = parseInt(selected_color_picker.value.slice(1), 16);
-    ChildShapes[selected.object.ChildShapeID].createMesh();
+    if (selected.type!="ChildShape") return;
+    ChildShapes[selected.objectID].color = parseInt(selected_color_picker.value.slice(1), 16);
+    ChildShapes[selected.objectID].createMesh();
 });
 
 input_position_x.addEventListener('input', function(evt) {
-    ChildShapes[selected.object.ChildShapeID].position.x = Math.floor(input_position_x.value);
-    ChildShapes[selected.object.ChildShapeID].createMesh();
+    if (selected.type!="ChildShape") return;
+    ChildShapes[selected.objectID].position.x = Math.floor(input_position_x.value);
+    ChildShapes[selected.objectID].createMesh();
 });
 
 input_position_y.addEventListener('input', function(evt) {
-    ChildShapes[selected.object.ChildShapeID].position.y = Math.floor(input_position_y.value);
-    ChildShapes[selected.object.ChildShapeID].createMesh();
+    if (selected.type!="ChildShape") return;
+    ChildShapes[selected.objectID].position.y = Math.floor(input_position_y.value);
+    ChildShapes[selected.objectID].createMesh();
 });
 
 input_position_z.addEventListener('input', function(evt) {
-    ChildShapes[selected.object.ChildShapeID].position.z = Math.floor(input_position_z.value);
-    ChildShapes[selected.object.ChildShapeID].createMesh();
+    if (selected.type!="ChildShape") return;
+    ChildShapes[selected.objectID].position.z = Math.floor(input_position_z.value);
+    ChildShapes[selected.objectID].createMesh();
 });
 
 function animate() {
@@ -316,6 +332,20 @@ function animate() {
     controls.update();
 
     raycaster.setFromCamera(pointer, camera);
+
+
+    let time = new Date();
+
+    let selectionColor = new THREE.Color("white");
+
+    selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
+
+    if (selected.type=="ChildShape") {
+        if (ChildShapes[selected.objectID].type=="block") {
+            selectionColor.lerp(new THREE.Color(ChildShapes[selected.objectID].color), 0.2);
+            ChildShapes[selected.objectID].mesh.material.color = selectionColor;
+        }
+    }
 
     renderer.render(scene, camera);
 }
@@ -367,7 +397,7 @@ let db;
 let ChildShapes = [];
 let RigidBodies = [];
 
-let selected;
+let selected = new selection("none", 0);
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -400,7 +430,7 @@ main_view.children[1].onclick = function() {
     if (intersects.length == 0) return;
     if (intersects[0].object.ChildShapeID == undefined) return;
 
-    select(intersects[0]);
+    select("ChildShape", intersects[0].object.ChildShapeID);
 }
 
 animate();
