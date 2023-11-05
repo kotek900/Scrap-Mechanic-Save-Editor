@@ -99,12 +99,22 @@ class ChildShape {
         let statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
     }
+
+    delete() {
+        RigidBodies[this.bodyID].group.remove(this.mesh);
+        RigidBodies[this.bodyID].removeChildShape(this.id);
+        this.mesh.remove();
+        let statement = db.prepare("DELETE FROM ChildShape WHERE id = ?;");
+        statement.run([this.id]);
+    }
     
     constructor(data) {
         this.data = data[2];
         this.id = data[0];
         this.bodyID = data[1];
         this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
+
+        RigidBodies[this.bodyID].addChildShape(this.id);
 
         this.UUID = "";
         for (let i = 0; i < 16; i++) {
@@ -144,6 +154,25 @@ class ChildShape {
 }
 
 class RigidBody {
+    addChildShape(id) {
+        this.ChildShapes.push(id);
+    }
+
+    removeChildShape(id) {
+        let index = this.ChildShapes.find((element) => element == id);
+        this.ChildShapes.splice(index, 1);
+    }
+
+    delete() {
+        while (this.ChildShapes.length>0) {
+            let ID = this.ChildShapes[this.ChildShapes.length-1];
+            ChildShapes[ID].delete();
+            this.ChildShapes.pop();
+        }
+        let statement = db.prepare("DELETE FROM RigidBody WHERE id = ?;");
+        statement.run([this.id]);
+    }
+
     constructor(data) {
         this.data = data[2];
         this.id = data[0];
@@ -232,6 +261,8 @@ class RigidBody {
 
         }
 
+        this.ChildShapes = [];
+
         scene.add(this.group);
     }
 }
@@ -241,20 +272,41 @@ class RigidBody {
 function select(type, objectID) {
     deselect();
 
-    if (type=="ChildShape") {
-        selected = new selection(type, objectID);
+    selected = new selection(type, objectID);
 
+    if (type!="none") {
+        input_box_buttons.style.display = "block";
+    }
+
+    if (type=="ChildShape") {
+        ChildShape_menu.style.display = "block";
         info_selected.textContent = ChildShapes[objectID].type + " ID: " + objectID;
+
+        button_select_body.style.display = "inline-block";
+
         selected_color_picker.value = "#" + ChildShapes[objectID].color.toString(16).padStart(6, '0');
         selected_UUID.value = ChildShapes[objectID].UUID;
 
         input_position_x.value = ChildShapes[objectID].position.x;
         input_position_y.value = ChildShapes[objectID].position.y;
         input_position_z.value = ChildShapes[objectID].position.z;
+    } else if (type=="RigidBody") {
+        RigidBody_menu.style.display = "block";
+        info_selected.textContent = "Rigid body ID: " + objectID;
+
+
     }
 }
 
 function deselect() {
+    info_selected.textContent = "none";
+
+    ChildShape_menu.style.display = "none";
+    RigidBody_menu.style.display = "none";
+
+    button_select_body.style.display = "none";
+    input_box_buttons.style.display = "none";
+
     if (selected.type=="ChildShape") {
         ChildShapes[selected.objectID].updateDatabase();
         if (ChildShapes[selected.objectID].type=="block") {
@@ -293,7 +345,7 @@ save_file_button.addEventListener('mouseenter', function(evt) {
     if (db==undefined) return;
 
     //update DB for selected objects
-    ChildShapes[selected.objectID].updateDatabase();
+    if (selected.type=="ChildShape") ChildShapes[selected.objectID].updateDatabase();
 
     let data = db.export();
     let dataBlob = new Blob([data]);
@@ -301,7 +353,35 @@ save_file_button.addEventListener('mouseenter', function(evt) {
     save_file_link.href = url;
 });
 
-//TODO: add UUID Event Listener to update the UUID
+button_delete.addEventListener('click', function(evt) {
+    if (selected.type=="ChildShape") {
+        let objectID = selected.objectID;
+        deselect();
+        ChildShapes[objectID].delete();
+    } else if (selected.type=="RigidBody") {
+        let objectID = selected.objectID;
+        deselect();
+        RigidBodies[objectID].delete();
+    }
+});
+
+button_select_body.addEventListener('click', function(evt) {
+    if (selected.type=="ChildShape") {
+        let bodyID = ChildShapes[selected.objectID].bodyID;
+        select("RigidBody", bodyID);
+    }
+});
+
+selected_UUID.addEventListener('input', function(evt) {
+    if (selected.type!="ChildShape") return;
+
+    //regex for UUID
+    let regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    if (selected_UUID.value.match(regex)==null) return; //check if UUID is valid
+
+    //set thew new UUID
+    ChildShapes[selected.objectID].UUID = selected_UUID.value;
+});
 
 selected_color_picker.addEventListener('input', function(evt) {
     if (selected.type!="ChildShape") return;
@@ -398,6 +478,7 @@ let ChildShapes = [];
 let RigidBodies = [];
 
 let selected = new selection("none", 0);
+deselect();
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();

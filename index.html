@@ -16,15 +16,26 @@
         </div>
         <div id="main_view">
             <div id="tool_menu">
-                Selected: <span id="info_selected">none</span>
-                <br> UUID:
-                <input type="text" id="selected_UUID" size="36" maxlength="36"></input>
-                <br> Color: <input type="color" id="selected_color_picker"></input>
-                <br> Relative position:
-                <br> z: <input type="number" id="input_position_x"></input>
-                <br> y: <input type="number" id="input_position_y"></input>
-                <br> x: <input type="number" id="input_position_z"></input>
-                <br>
+                <div class="input_box" id="info_selected_text">Selected: <span id="info_selected">none</span></div>
+                <div class="input_box" id="input_box_buttons"><button id="button_select_body">Select rigid body</button><button id="button_delete">delete object</button></div>
+                <div id="ChildShape_menu">
+                    <div class="input_box">UUID: <input type="text" id="selected_UUID" size="36" maxlength="36"></input></div>
+                    <div class="input_box">Color: <input type="color" id="selected_color_picker"></input></div>
+                    <div class="input_box">
+                        Local position:
+                        <br> x: <input type="number" id="input_position_z"></input>
+                        <br> y: <input type="number" id="input_position_y"></input>
+                        <br> z: <input type="number" id="input_position_x"></input>
+                    </div>
+                </div>
+                <div id="RigidBody_menu">
+                    <div class="input_box">
+                        Position:
+                        <br>x: <input type="number" id="input_position_z_float"></input>
+                        <br>y: <input type="number" id="input_position_y_float"></input>
+                        <br>z: <input type="number" id="input_position_z_float"></input>
+                    </div>
+                </div>
             </div>
         </div>
         <script type="importmap">

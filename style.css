@@ -2,6 +2,22 @@ body {
     margin: 0px;
 }
 
+.input_box {
+    background-color: #3a393e;
+    margin: 5px;
+    padding: 5px;
+    box-shadow: 1px 1px 4px black;
+    border-radius: 3px;
+}
+
+.input_box button {
+    height: 35px;
+}
+
+#input_box_buttons {
+    height: 40px;
+}
+
 #top_bar {
     background-color: #1aa3e8;
     color: black;
@@ -30,27 +46,47 @@ body {
 }
 
 #save_file_button {
-  float: right;
-  height: 100%;
-  aspect-ratio: 1;
+    float: right;
+    height: 100%;
+    aspect-ratio: 1;
 }
 
 #main_view { }
 
 #tool_menu {
-  background-color: #3a393e;
-  color: white;
-  width: 30%;
-  height: calc(100vh - 80px);
-  margin: 0 auto;
-  float: right;
-  padding: 5px;
+    background-color: #2d2d30;
+    color: white;
+    width: 30%;
+    height: calc(100vh - 80px);
+    margin: 0 auto;
+    float: right;
+    padding: 5px;
 }
 
 canvas {
-  float: left;
+    float: left;
 }
 
 #selected_UUID {
-  font: 100% Lucida Console, monospace;
+    font: 100% Lucida Console, monospace;
+}
+
+#info_selected_text {
+    font-size: 23px;
+    font-weight: bold;
+}
+
+#button_delete {
+    float: right;
+    background-color: #751707;
+    border: 2px solid #470f05;
+    color: white;
+}
+
+#button_delete:hover {
+    background-color: #851b09;
+}
+
+#button_delete:active {
+    background-color: #521005;
 }
