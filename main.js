@@ -154,6 +154,35 @@ class ChildShape {
 }
 
 class RigidBody {
+    updateDatabase() {
+        let bytes;
+
+        bytes = floatToBytes(this.position.x);
+
+        this.data[0x2B] = bytes.getUint8(0);
+        this.data[0x2C] = bytes.getUint8(1);
+        this.data[0x2D] = bytes.getUint8(2);
+        this.data[0x2E] = bytes.getUint8(3);
+
+        bytes = floatToBytes(this.position.y);
+
+        this.data[0x2F] = bytes.getUint8(0);
+        this.data[0x30] = bytes.getUint8(1);
+        this.data[0x31] = bytes.getUint8(2);
+        this.data[0x32] = bytes.getUint8(3);
+
+        bytes = floatToBytes(this.position.z);
+
+        this.data[0x33] = bytes.getUint8(0);
+        this.data[0x34] = bytes.getUint8(1);
+        this.data[0x35] = bytes.getUint8(2);
+        this.data[0x36] = bytes.getUint8(3);
+
+
+        let statement = db.prepare("UPDATE RigidBody SET data = ? WHERE id = ?;");
+        statement.run([this.data, this.id]);
+    }
+
     addChildShape(id) {
         this.ChildShapes.push(id);
     }
@@ -171,6 +200,10 @@ class RigidBody {
         }
         let statement = db.prepare("DELETE FROM RigidBody WHERE id = ?;");
         statement.run([this.id]);
+    }
+
+    updatePosition() {
+        this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
     }
 
     constructor(data) {
@@ -294,7 +327,9 @@ function select(type, objectID) {
         RigidBody_menu.style.display = "block";
         info_selected.textContent = "Rigid body ID: " + objectID;
 
-
+        input_position_x_float.value = RigidBodies[objectID].position.x;
+        input_position_y_float.value = RigidBodies[objectID].position.y;
+        input_position_z_float.value = RigidBodies[objectID].position.z;
     }
 }
 
@@ -307,14 +342,31 @@ function deselect() {
     button_select_body.style.display = "none";
     input_box_buttons.style.display = "none";
 
+    updateSelectedDatabase();
+
     if (selected.type=="ChildShape") {
-        ChildShapes[selected.objectID].updateDatabase();
         if (ChildShapes[selected.objectID].type=="block") {
             //reset the color
             ChildShapes[selected.objectID].mesh.material.color = new THREE.Color(ChildShapes[selected.objectID].color);
         }
     }
+
     selected = new selection("none", 0);
+}
+
+function updateSelectedDatabase() {
+    if (selected.type=="ChildShape") {
+        ChildShapes[selected.objectID].updateDatabase();
+    } else if (selected.type=="RigidBody") {
+        RigidBodies[selected.objectID].updateDatabase();
+    }
+}
+
+function floatToBytes(number) {
+    const buffer = new ArrayBuffer(4);
+    const view = new DataView(buffer);
+    view.setFloat32(0, number);
+    return view;
 }
 
 function onPointerMove(event) {
@@ -344,8 +396,7 @@ save_file_button.addEventListener('mouseenter', function(evt) {
 
     if (db==undefined) return;
 
-    //update DB for selected objects
-    if (selected.type=="ChildShape") ChildShapes[selected.objectID].updateDatabase();
+    updateSelectedDatabase();
 
     let data = db.export();
     let dataBlob = new Blob([data]);
@@ -405,6 +456,25 @@ input_position_z.addEventListener('input', function(evt) {
     if (selected.type!="ChildShape") return;
     ChildShapes[selected.objectID].position.z = Math.floor(input_position_z.value);
     ChildShapes[selected.objectID].createMesh();
+});
+
+
+input_position_x_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].position.x = input_position_x_float.value;
+    RigidBodies[selected.objectID].updatePosition();
+});
+
+input_position_y_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].position.y = input_position_y_float.value;
+    RigidBodies[selected.objectID].updatePosition();
+});
+
+input_position_z_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].position.z = input_position_z_float.value;
+    RigidBodies[selected.objectID].updatePosition();
 });
 
 function animate() {
