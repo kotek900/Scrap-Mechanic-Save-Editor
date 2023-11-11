@@ -65,7 +65,13 @@ class ChildShape {
         this.data[39] = green;
         this.data[38] = blue;
 
-        //UUID TODO
+        let i = 0;
+        let UUID_position = 26;
+        while (i < 36) {
+            this.data[UUID_position--]=parseInt(this.UUID[i]+this.UUID[i+1], 16);
+			if (i==6||i==11||i==16||i==21) i+=3;
+            else i+=2;
+        }
 
         //position
         let signX = 1;
@@ -94,7 +100,15 @@ class ChildShape {
         this.data[32]=position.z%256;
         this.data[31]=(position.z-position.z%256)/256;
 
-        //size/rotation TODO
+
+        if (this.type=="block") {
+            //size
+            this.data[0x2E] = this.size.x;
+            this.data[0x2C] = this.size.y;
+            this.data[0x2A] = this.size.z;
+        } else {
+            //rotation (assuming type is part) TODO
+        }
 
         let statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
@@ -317,6 +331,17 @@ function select(type, objectID) {
 
         button_select_body.style.display = "inline-block";
 
+        //size only applies to blocks and not parts
+        if (ChildShapes[objectID].type=="block") {
+            input_size.style.display = "block";
+
+            input_size_x.value = ChildShapes[objectID].size.x;
+            input_size_y.value = ChildShapes[objectID].size.y;
+            input_size_z.value = ChildShapes[objectID].size.z;
+        } else {
+            input_size.style.display = "none";
+        }
+
         selected_color_picker.value = "#" + ChildShapes[objectID].color.toString(16).padStart(6, '0');
         selected_UUID.value = ChildShapes[objectID].UUID;
 
@@ -458,6 +483,26 @@ input_position_z.addEventListener('input', function(evt) {
     ChildShapes[selected.objectID].createMesh();
 });
 
+input_size_x.addEventListener('input', function(evt) {
+    if (selected.type!="ChildShape") return;
+    if (ChildShapes[selected.objectID].type!="block") return;
+    ChildShapes[selected.objectID].size.x = Math.floor(input_size_x.value);
+    ChildShapes[selected.objectID].createMesh();
+});
+
+input_size_y.addEventListener('input', function(evt) {
+    if (selected.type!="ChildShape") return;
+    if (ChildShapes[selected.objectID].type!="block") return;
+    ChildShapes[selected.objectID].size.y = Math.floor(input_size_y.value);
+    ChildShapes[selected.objectID].createMesh();
+});
+
+input_size_z.addEventListener('input', function(evt) {
+    if (selected.type!="ChildShape") return;
+    if (ChildShapes[selected.objectID].type!="block") return;
+    ChildShapes[selected.objectID].size.z = Math.floor(input_size_z.value);
+    ChildShapes[selected.objectID].createMesh();
+});
 
 input_position_x_float.addEventListener('input', function(evt) {
     if (selected.type!="RigidBody") return;
