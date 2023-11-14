@@ -10,7 +10,9 @@ Rotate the camera with left click and move it around with right click.
 Select objects with left click without dragging the mouse.
 
 On the right you can see the propeties of the selected object,
-you can change the color and the position of blocks.
+you can change the color, position, UUID and size of blocks.
+It's also possible to select the rigid body of blocks and delete objects.
+To create new blocks you need to select the rigid body and then click the create block button.
 
 Finally to save the file, click the "save" button on the right to download the edited version.
 
