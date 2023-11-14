@@ -314,6 +314,32 @@ class RigidBody {
     }
 }
 
+let Game;
+
+class gameInfo {
+    constructor(data) {
+        this.savegameversion = data[0];
+        this.flags = data[1];
+        this.seed = data[2];
+        this.gametick = data[3];
+        this.mods = data[4];
+        this.uniqueIds = data[5];
+
+        this.ChildShapeID = data[5][15] + (data[5][14]<<8) + (data[5][13]<<16) + (data[5][12]<<24);
+    }
+
+    advanceChildShapeID() {
+        this.ChildShapeID++;
+        this.uniqueIds[15] = this.ChildShapeID%255;
+        this.uniqueIds[14] = (this.ChildShapeID>>8)%255;
+        this.uniqueIds[13] = (this.ChildShapeID>>16)%255;
+        this.uniqueIds[12] = (this.ChildShapeID>>24)%255;
+
+        let statement = db.prepare("UPDATE Game SET uniqueIds = ?;");
+        statement.run([this.uniqueIds]);
+    }
+}
+
 // Functions
 
 function select(type, objectID) {
@@ -352,6 +378,8 @@ function select(type, objectID) {
         RigidBody_menu.style.display = "block";
         info_selected.textContent = "Rigid body ID: " + objectID;
 
+        button_create_block.style.display = "inline-block";
+
         input_position_x_float.value = RigidBodies[objectID].position.x;
         input_position_y_float.value = RigidBodies[objectID].position.y;
         input_position_z_float.value = RigidBodies[objectID].position.z;
@@ -365,6 +393,8 @@ function deselect() {
     RigidBody_menu.style.display = "none";
 
     button_select_body.style.display = "none";
+    button_create_block.style.display = "none";
+
     input_box_buttons.style.display = "none";
 
     updateSelectedDatabase();
@@ -385,6 +415,56 @@ function updateSelectedDatabase() {
     } else if (selected.type=="RigidBody") {
         RigidBodies[selected.objectID].updateDatabase();
     }
+}
+
+function createChildShape(type, rigidBodyID) {
+    let data = new Uint8Array(47);
+    let childShapeID = Game.ChildShapeID;
+    let statement = db.prepare("INSERT INTO ChildShape (id, bodyId) VALUES (?, ?);");
+    statement.run([childShapeID, rigidBodyID]);
+
+    Game.advanceChildShapeID();
+
+    data[6] = childShapeID%256;
+    data[5] = (childShapeID>>8)%256;
+    data[4] = (childShapeID>>16)%256;
+    data[3] = (childShapeID>>24);
+
+    data[10] = rigidBodyID%256;
+    data[9] = (rigidBodyID>>8)%256;
+    data[8] = (rigidBodyID>>16)%256;
+    data[7] = (rigidBodyID>>24);
+
+    //rigid body ID is stored twice
+    data[30] = data[10];
+    data[29] = data[9];
+    data[28] = data[8];
+    data[27] = data[7];
+
+    if (type=="block") {
+        data[42] = 1;
+        data[44] = 1;
+        data[46] = 1;
+    }
+
+    data[0] = 1;
+    data[2] = 1;
+    data[37] = 255;
+
+    if (type == "block") data[1] = 0x1f;
+    if (type == "part") data[1] = 0x20;
+
+    statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
+    statement.run([data, childShapeID]);
+
+    let info = [];
+    info[0] = childShapeID;
+    info[1] = rigidBodyID;
+    info[2] = data;
+
+    ChildShapes[childShapeID] = new ChildShape(info);
+
+    select("ChildShape", childShapeID);
 }
 
 function floatToBytes(number) {
@@ -446,6 +526,11 @@ button_select_body.addEventListener('click', function(evt) {
         let bodyID = ChildShapes[selected.objectID].bodyID;
         select("RigidBody", bodyID);
     }
+});
+
+button_create_block.addEventListener('click', function(evt) {
+    if (selected.type!="RigidBody") return;
+    createChildShape("block", selected.objectID);
 });
 
 selected_UUID.addEventListener('input', function(evt) {
@@ -659,10 +744,12 @@ open_file_button.onchange = () => {
         const Uints = new Uint8Array(r.result);
         db = new SQL.Database(Uints);
 
-        let gameInfo = db.exec("SELECT * FROM Game;")[0].values[0];
-        let gameversion = gameInfo[0];
-        let seed = gameInfo[2];
-        let gametick = gameInfo[3];
+        let gameData = db.exec("SELECT * FROM Game;")[0].values[0];
+        let gameversion = gameData[0];
+        let seed = gameData[2];
+        let gametick = gameData[3];
+
+        Game = new gameInfo(gameData);
 
         info_gameversion.textContent = "Version: " + gameversion;
         info_seed.textContent = "Seed: " + seed;
@@ -677,6 +764,8 @@ open_file_button.onchange = () => {
         for (let i = 0; i < ChildShapeData.length; i++) {
             ChildShapes[ChildShapeData[i][0]] = new ChildShape(ChildShapeData[i]);
         }
+
+        deselect();
     }
     r.readAsArrayBuffer(f);
 }
