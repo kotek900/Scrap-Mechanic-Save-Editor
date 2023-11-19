@@ -130,13 +130,7 @@ class ChildShape {
 
         RigidBodies[this.bodyID].addChildShape(this.id);
 
-        this.UUID = "";
-        for (let i = 0; i < 16; i++) {
-            this.UUID += data[2][26-i].toString(16).padStart(2, '0');
-            if (i === 3 || i === 5 || i === 7 || i === 9) {
-                this.UUID += "-";
-            }
-        }
+        this.UUID = readUUID(data[2],26);
         
         let partType = data[2][1];
         if (partType == 0x1f) {
@@ -317,6 +311,44 @@ class RigidBody {
 let Game;
 
 class gameInfo {
+    addMod(fileId, localId) {
+        this.modList.push({ fileId: fileId, localId: localId });
+
+        info_mods.textContent = this.modList.length;
+
+
+        this.addModToTable({ fileId: fileId, localId: localId }, this.modList.length-1);
+    }
+
+    addModToTable(mod, position) {
+        let currentRow = table_mods.insertRow(position+1);
+        let fileId_Cell = currentRow.insertCell(0);
+        let localId_Cell = currentRow.insertCell(1);
+        let button_remove_Cell = currentRow.insertCell(2);
+
+
+        var linkElement = document.createElement("a");
+        linkElement.innerText = mod.fileId;
+        linkElement.href = "https://steamcommunity.com/sharedfiles/filedetails/?id="+mod.fileId;
+        linkElement.target = "_blank";
+        linkElement.classList.add("link_alterantive_1");
+        fileId_Cell.appendChild(linkElement);
+
+        localId_Cell.textContent = mod.localId;
+
+        var buttonElement = document.createElement("button");
+        buttonElement.innerText = "🗙";
+        buttonElement.classList.add("table_remove");
+        button_remove_Cell.appendChild(buttonElement);
+
+        buttonElement.addEventListener("click", () => {
+            let modID = currentRow.rowIndex-1;
+            this.modList.splice(modID,1);
+            currentRow.remove();
+            info_mods.textContent = this.modList.length;
+        });
+    }
+
     constructor(data) {
         this.savegameversion = data[0];
         this.flags = data[1];
@@ -326,17 +358,70 @@ class gameInfo {
         this.uniqueIds = data[5];
 
         this.ChildShapeID = data[5][15] + (data[5][14]<<8) + (data[5][13]<<16) + (data[5][12]<<24);
+
+        this.modList = Array((this.mods[0]<<24)+(this.mods[1]<<16)+(this.mods[2]<<8)+this.mods[3]);
+
+        info_mods.textContent = this.modList.length;
+
+        for (let i = 0; i < this.modList.length; i++) {
+            let fileId = 0;
+            for (let j = 0; j < 8; j++) {
+                fileId = fileId << 8;
+                fileId+= this.mods[i*25+4+j];
+            }
+
+            let localId = readUUID(this.mods, i*25+27);
+
+            this.modList[i] = { fileId: fileId, localId: localId };
+
+            this.addModToTable(this.modList[i], i);
+        }
     }
 
     advanceChildShapeID() {
         this.ChildShapeID++;
-        this.uniqueIds[15] = this.ChildShapeID%255;
-        this.uniqueIds[14] = (this.ChildShapeID>>8)%255;
-        this.uniqueIds[13] = (this.ChildShapeID>>16)%255;
-        this.uniqueIds[12] = (this.ChildShapeID>>24)%255;
+        this.uniqueIds[15] = this.ChildShapeID%256;
+        this.uniqueIds[14] = (this.ChildShapeID>>8)%256;
+        this.uniqueIds[13] = (this.ChildShapeID>>16)%256;
+        this.uniqueIds[12] = (this.ChildShapeID>>24)%256;
 
         let statement = db.prepare("UPDATE Game SET uniqueIds = ?;");
         statement.run([this.uniqueIds]);
+    }
+
+    updateDatabase() {
+        let statement = db.prepare("UPDATE Game SET savegameversion = ?, seed = ?, gametick = ?;");
+        statement.run([this.savegameversion, this.seed, this.gametick]);
+
+        let modData = new Uint8Array(this.modList.length*24+4);
+
+        modData[3] = this.modList.length%256;
+        modData[2] = (this.modList.length>>8)%256;
+        modData[1] = (this.modList.length>>16)%256;
+        modData[0] = (this.modList.length>>24)%256;
+
+
+        for (let i = 0; i < this.modList.length; i++) {
+            let thisFileId = this.modList[i].fileId;
+            for (let j = 0; j < 8; j++) {
+                modData[i*24+11-j] = thisFileId%256;
+                thisFileId = thisFileId >> 8;
+            }
+
+            let k = 0;
+            let UUID_position = i*24+27;
+            while (k < 36) {
+                modData[UUID_position--]=parseInt(this.modList[i].localId[k]+this.modList[i].localId[k+1], 16);
+                if (k==6||k==11||k==16||k==21) k+=3;
+                else k+=2;
+            }
+        }
+
+
+        this.mods = modData;
+
+        statement = db.prepare("UPDATE Game SET mods = ?;");
+        statement.run([modData]);
     }
 }
 
@@ -347,10 +432,18 @@ function select(type, objectID) {
 
     selected = new selection(type, objectID);
 
-    if (type!="none") {
+    if (type!="none"&&type!="GameInfo") {
         input_box_buttons.style.display = "block";
     }
 
+    if (type=="GameInfo") {
+        GameInfo_menu.style.display = "block";
+        info_selected.textContent = "Game Info";
+
+        input_seed.value = Game.seed;
+        input_tick.value = Game.gametick;
+        input_version.value = Game.savegameversion;
+    }
     if (type=="ChildShape") {
         ChildShape_menu.style.display = "block";
         info_selected.textContent = ChildShapes[objectID].type + " ID: " + objectID;
@@ -389,6 +482,7 @@ function select(type, objectID) {
 function deselect() {
     info_selected.textContent = "none";
 
+    GameInfo_menu.style.display = "none";
     ChildShape_menu.style.display = "none";
     RigidBody_menu.style.display = "none";
 
@@ -410,11 +504,24 @@ function deselect() {
 }
 
 function updateSelectedDatabase() {
-    if (selected.type=="ChildShape") {
+    if (selected.type=="GameInfo") {
+        Game.updateDatabase();
+    } else if (selected.type=="ChildShape") {
         ChildShapes[selected.objectID].updateDatabase();
     } else if (selected.type=="RigidBody") {
         RigidBodies[selected.objectID].updateDatabase();
     }
+}
+
+function readUUID(data, location) {
+    let UUID = "";
+    for (let i = 0; i < 16; i++) {
+        UUID += data[location-i].toString(16).padStart(2, '0');
+        if (i === 3 || i === 5 || i === 7 || i === 9) {
+            UUID += "-";
+        }
+    }
+    return UUID;
 }
 
 function createChildShape(type, rigidBodyID) {
@@ -495,6 +602,12 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
 }
 
+function checkInvalidUUID(UUID) {
+    //regex for UUID
+    let regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    return (UUID.match(regex)==null);
+}
+
 
 //update the save file
 save_file_button.addEventListener('mouseenter', function(evt) {
@@ -507,6 +620,10 @@ save_file_button.addEventListener('mouseenter', function(evt) {
     let dataBlob = new Blob([data]);
     let url = URL.createObjectURL(dataBlob);
     save_file_link.href = url;
+});
+
+button_select_game_info.addEventListener('click', function(evt) {
+    select("GameInfo", -1);
 });
 
 button_delete.addEventListener('click', function(evt) {
@@ -533,16 +650,40 @@ button_create_block.addEventListener('click', function(evt) {
     createChildShape("block", selected.objectID);
 });
 
+
+button_add_mod.addEventListener('click', function(evt) {
+    if (selected.type!="GameInfo") return;
+    if (checkInvalidUUID(input_mod_localId.value)) return;
+    Game.addMod(input_mod_fileId.value, input_mod_localId.value);
+});
+
 selected_UUID.addEventListener('input', function(evt) {
     if (selected.type!="ChildShape") return;
 
-    //regex for UUID
-    let regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-    if (selected_UUID.value.match(regex)==null) return; //check if UUID is valid
+    if (checkInvalidUUID(selected_UUID.value)) return;
 
-    //set thew new UUID
     ChildShapes[selected.objectID].UUID = selected_UUID.value;
 });
+
+
+input_seed.addEventListener('input', function(evt) {
+    if (selected.type!="GameInfo") return;
+    Game.seed = input_seed.value;
+    info_seed.textContent = "Seed: " + Game.seed;
+});
+
+input_tick.addEventListener('input', function(evt) {
+    if (selected.type!="GameInfo") return;
+    Game.gametick = input_tick.value;
+    info_gametick.textContent = "Tick: " + Game.gametick;
+});
+
+input_version.addEventListener('input', function(evt) {
+    if (selected.type!="GameInfo") return;
+    Game.savegameversion = input_version.value;
+    info_gameversion.textContent = "Version: " + Game.savegameversion;
+});
+
 
 selected_color_picker.addEventListener('input', function(evt) {
     if (selected.type!="ChildShape") return;

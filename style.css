@@ -41,6 +41,10 @@ body {
     margin-top: 0px;
 }
 
+#top_bar button {
+    height: 100%;
+}
+
 #open_file_button {
     font-size: 20px;
 }
@@ -61,13 +65,33 @@ body {
     margin: 0 auto;
     float: right;
     padding: 5px;
+    overflow: scroll;
+}
+
+#table_mods {
+    border-collapse: collapse;
+    margin-top: 5px;
+    background: #212124;
+}
+
+#table_mods tr td {
+    border: thin solid black;
+    padding: 7px;
+    text-align: center;
+}
+
+.table_remove {
+    background-color: #751707;
+    border: 2px solid #470f05;
+    color: white;
+    aspect-ratio: 1;
 }
 
 canvas {
     float: left;
 }
 
-#selected_UUID {
+#selected_UUID, #input_mod_localId {
     font: 100% Lucida Console, monospace;
 }
 
@@ -83,10 +107,18 @@ canvas {
     color: white;
 }
 
-#button_delete:hover {
+#button_delete:hover, .table_remove:hover {
     background-color: #851b09;
 }
 
-#button_delete:active {
+#button_delete:active, .table_remove:active {
     background-color: #521005;
+}
+
+.link_alterantive_1 {
+    color: deepskyblue;
+}
+
+.link_alterantive_1:visited {
+    color: violet;
 }
