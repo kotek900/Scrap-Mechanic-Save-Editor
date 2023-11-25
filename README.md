@@ -2,7 +2,7 @@
 An online editor for Scrap Mechanic save files.
 
 ## Use
-Online version can be found at: https://kotek900.com/SM-save-edit/
+Online version can be found at: https://kotek900.com/Scrap-Mechanic-Save-Editor/
 
 Open a Scrap Mechanic save file (.db) with the button on the top left.
 Rotate the camera with left click and move it around with right click.
@@ -23,4 +23,4 @@ For example you can use `python3 -m http.server` or any other server software, t
 
 ## Future versions
 
-Work on the save editor is still in progress, you can contribute on [GitHub](https://github.com/kotek900/SM-save-edit/).
+Work on the save editor is still in progress, you can contribute on [GitHub](https://github.com/kotek900/Scrap-Mechanic-Save-Editor/).
