@@ -74,31 +74,10 @@ class ChildShape {
         }
 
         //position
-        let signX = 1;
-        let signY = 1;
-        let signZ = 1;
-        let position = { x: this.position.x, y: this.position.y, z: this.position.z }; //this has to be this way because of JavaScript
-        if (this.position.x<0) {
-            signX = -1;
-            position.x += 65536;
-        }
-        if (this.position.y<0) {
-            signY = -1;
-            position.y += 65536;
-        }
-        if (this.position.z<0) {
-            signZ = -1;
-            position.z += 65536;
-        }
 
-        this.data[36]=position.x%256;
-        this.data[35]=(position.x-position.x%256)/256;
-
-        this.data[34]=position.y%256;
-        this.data[33]=(position.y-position.y%256)/256;
-
-        this.data[32]=position.z%256;
-        this.data[31]=(position.z-position.z%256)/256;
+        writeInt16ToData(this.data, 35, this.position.x);
+        writeInt16ToData(this.data, 33, this.position.y);
+        writeInt16ToData(this.data, 31, this.position.z);
 
 
         if (this.type=="block") {
@@ -145,17 +124,13 @@ class ChildShape {
             this.rotation = data[2][41];
         }
 
-        // Why is this not just turning it into a short from the start?
-        // This is cursed on so many levels
+
         this.position = {
-            x: (data[2][35] << 8) + data[2][36], 
-            y: (data[2][33] << 8) + data[2][34], 
-            z: (data[2][31] << 8) + data[2][32] 
+            x: readInt16FromData(data[2], 35),
+            y: readInt16FromData(data[2], 33),
+            z: readInt16FromData(data[2], 31)
         }
 
-        if (data[2][35] > 127) this.position.x -= 65536;
-        if (data[2][33] > 127) this.position.y -= 65536;
-        if (data[2][31] > 127) this.position.z -= 65536;
 
         this.createMesh();
     }
@@ -163,29 +138,13 @@ class ChildShape {
 
 class RigidBody {
     updateDatabase() {
-        let bytes;
 
-        bytes = floatToBytes(this.position.x);
+        writeFloatToData(this.data, 0x2B, this.position.x);
+        writeFloatToData(this.data, 0x2F, this.position.y);
+        writeFloatToData(this.data, 0x33, this.position.z);
 
-        this.data[0x2B] = bytes.getUint8(0);
-        this.data[0x2C] = bytes.getUint8(1);
-        this.data[0x2D] = bytes.getUint8(2);
-        this.data[0x2E] = bytes.getUint8(3);
 
-        bytes = floatToBytes(this.position.y);
-
-        this.data[0x2F] = bytes.getUint8(0);
-        this.data[0x30] = bytes.getUint8(1);
-        this.data[0x31] = bytes.getUint8(2);
-        this.data[0x32] = bytes.getUint8(3);
-
-        bytes = floatToBytes(this.position.z);
-
-        this.data[0x33] = bytes.getUint8(0);
-        this.data[0x34] = bytes.getUint8(1);
-        this.data[0x35] = bytes.getUint8(2);
-        this.data[0x36] = bytes.getUint8(3);
-
+        // TODO save rotation data
 
         let statement = db.prepare("UPDATE RigidBody SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
@@ -211,83 +170,15 @@ class RigidBody {
     }
 
     updatePosition() {
-        this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
+        this.group.position.set(-this.position.x, this.position.z, this.position.y);
     }
 
-    constructor(data) {
-        this.data = data[2];
-        this.id = data[0];
-        this.worldID = data[1];
-
-        // TODO: make this readable.
-        let floatStringX = "0x";
-        let floatStringY = "0x";
-        let floatStringZ = "0x";
-        floatStringX = floatStringX + 
-            data[2][0x2B].toString(16).padStart(2, '0') + 
-            data[2][0x2C].toString(16).padStart(2, '0') + 
-            data[2][0x2D].toString(16).padStart(2, '0') + 
-            data[2][0x2E].toString(16).padStart(2, '0');
-        floatStringY = floatStringY + 
-            data[2][0x2F].toString(16).padStart(2, '0') + 
-            data[2][0x30].toString(16).padStart(2, '0') + 
-            data[2][0x31].toString(16).padStart(2, '0') + 
-            data[2][0x32].toString(16).padStart(2, '0');
-        floatStringZ = floatStringZ + 
-            data[2][0x33].toString(16).padStart(2, '0') + 
-            data[2][0x34].toString(16).padStart(2, '0') + 
-            data[2][0x35].toString(16).padStart(2, '0') + 
-            data[2][0x36].toString(16).padStart(2, '0');
-
-        this.position = {
-            x: parseFloat(floatStringX), 
-            y: parseFloat(floatStringY), 
-            z: parseFloat(floatStringZ) 
-        }
-
-
-        let floatStringQA = "0x";
-        let floatStringQB = "0x";
-        let floatStringQC = "0x";
-        let floatStringQD = "0x";
-        floatStringQA = floatStringQA +
-            data[2][27].toString(16).padStart(2, '0') +
-            data[2][28].toString(16).padStart(2, '0') +
-            data[2][29].toString(16).padStart(2, '0') +
-            data[2][30].toString(16).padStart(2, '0');
-        floatStringQB = floatStringQB +
-            data[2][31].toString(16).padStart(2, '0') +
-            data[2][32].toString(16).padStart(2, '0') +
-            data[2][33].toString(16).padStart(2, '0') +
-            data[2][34].toString(16).padStart(2, '0');
-        floatStringQC = floatStringQC +
-            data[2][35].toString(16).padStart(2, '0') +
-            data[2][36].toString(16).padStart(2, '0') +
-            data[2][37].toString(16).padStart(2, '0') +
-            data[2][38].toString(16).padStart(2, '0');
-        floatStringQD = floatStringQD +
-            data[2][39].toString(16).padStart(2, '0') +
-            data[2][40].toString(16).padStart(2, '0') +
-            data[2][41].toString(16).padStart(2, '0') +
-            data[2][42].toString(16).padStart(2, '0');
-
-        let QA = parseFloat(floatStringQA);
-        let QB = parseFloat(floatStringQB);
-        let QC = parseFloat(floatStringQC);
-        let QD = parseFloat(floatStringQD);
-
-        this.group = new THREE.Group();
-
-        this.group.position.set(-this.position.x*4, this.position.z*4, this.position.y*4);
-        this.group.quaternion.set(QB, QC, QD, QA);
-
-        let rotationX = this.group.rotation.x;
-        let rotationY = this.group.rotation.y;
-        let rotationZ = this.group.rotation.z;
-
-        this.rotation = { x: rotationX, y: rotationY, z: rotationZ };
-
+    updateRotation() {
         this.group.rotation.set(0,0,0);
+
+        let rotationX = this.rotation.x;
+        let rotationY = this.rotation.y;
+        let rotationZ = this.rotation.z;
 
         if (!(rotationX==0&&rotationY==0&&rotationZ==0)) {
 
@@ -301,6 +192,40 @@ class RigidBody {
             this.group.rotateOnWorldAxis(axis, rotationZ+Math.PI);
 
         }
+    }
+
+    constructor(data) {
+        this.data = data[2];
+        this.id = data[0];
+        this.worldID = data[1];
+
+
+
+        this.position = {
+            x: readFloatFromData(data[2], 0x2B),
+            y: readFloatFromData(data[2], 0x2F),
+            z: readFloatFromData(data[2], 0x33)
+        }
+
+        let QA = readFloatFromData(data[2], 27);
+        let QB = readFloatFromData(data[2], 31);
+        let QC = readFloatFromData(data[2], 35);
+        let QD = readFloatFromData(data[2], 39);
+
+        this.group = new THREE.Group();
+
+        this.group.scale.set(1/4, 1/4, 1/4);
+
+        this.group.position.set(-this.position.x, this.position.z, this.position.y);
+        this.group.quaternion.set(QB, QC, QD, QA);
+
+        let rotationX = this.group.rotation.x;
+        let rotationY = this.group.rotation.y;
+        let rotationZ = this.group.rotation.z;
+
+        this.rotation = { x: rotationX, y: rotationY, z: rotationZ };
+
+        this.updateRotation();
 
         this.ChildShapes = [];
 
@@ -476,6 +401,10 @@ function select(type, objectID) {
         input_position_x_float.value = RigidBodies[objectID].position.x;
         input_position_y_float.value = RigidBodies[objectID].position.y;
         input_position_z_float.value = RigidBodies[objectID].position.z;
+
+        input_rotation_x_float.value = RigidBodies[objectID].rotation.x;
+        input_rotation_y_float.value = RigidBodies[objectID].rotation.y;
+        input_rotation_z_float.value = RigidBodies[objectID].rotation.z;
     }
 }
 
@@ -512,6 +441,28 @@ function updateSelectedDatabase() {
         RigidBodies[selected.objectID].updateDatabase();
     }
 }
+
+function writeFloatToData(data, location, float) {
+    const view = new DataView(data.buffer, location);
+    view.setFloat32(0, float);
+}
+
+function readFloatFromData(data, location) {
+    const view = new DataView(data.buffer, location);
+    return view.getFloat32(0);
+}
+
+function writeInt16ToData(data, location, int) {
+    const view = new DataView(data.buffer, location);
+    view.setInt16(0, int);
+}
+
+function readInt16FromData(data, location) {
+    const view = new DataView(data.buffer, location);
+    return view.getInt16(0);
+}
+
+
 
 function readUUID(data, location) {
     let UUID = "";
@@ -572,13 +523,6 @@ function createChildShape(type, rigidBodyID) {
     ChildShapes[childShapeID] = new ChildShape(info);
 
     select("ChildShape", childShapeID);
-}
-
-function floatToBytes(number) {
-    const buffer = new ArrayBuffer(4);
-    const view = new DataView(buffer);
-    view.setFloat32(0, number);
-    return view;
 }
 
 function onPointerMove(event) {
@@ -748,6 +692,24 @@ input_position_z_float.addEventListener('input', function(evt) {
     RigidBodies[selected.objectID].updatePosition();
 });
 
+input_rotation_x_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].rotation.x = input_rotation_x_float.value*1;
+    RigidBodies[selected.objectID].updateRotation();
+});
+
+input_rotation_y_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].rotation.y = input_rotation_y_float.value*1;
+    RigidBodies[selected.objectID].updateRotation();
+});
+
+input_rotation_z_float.addEventListener('input', function(evt) {
+    if (selected.type!="RigidBody") return;
+    RigidBodies[selected.objectID].rotation.z = input_rotation_z_float.value*1;
+    RigidBodies[selected.objectID].updateRotation();
+});
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -771,34 +733,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-function parseFloat(str) {
-    if (str=="0x00000000") return 0; //floating point error
-    var float = 0,
-        sign, order, mantiss, exp,
-        int = 0,
-        multi = 1;
-    if (/^0x/.exec(str)) {
-        int = parseInt(str, 16);
-    } else {
-        for (var i = str.length - 1; i >= 0; i -= 1) {
-            if (str.charCodeAt(i) > 255) {
-                console.log('Wrong string parameter');
-                return false;
-            }
-            int += str.charCodeAt(i) * multi;
-            multi *= 256;
-        }
-    }
-    sign = (int >>> 31) ? -1 : 1;
-    exp = (int >>> 23 & 0xff) - 127;
-    let mantissa = ((int & 0x7fffff) + 0x800000)
-        .toString(2);
-    for (i = 0; i < mantissa.length; i += 1) {
-        float += parseInt(mantissa[i]) ? Math.pow(2, exp) : 0;
-        exp--;
-    }
-    return float * sign;
-}
 
 // Main code
 
