@@ -523,6 +523,8 @@ function createChildShape(type, rigidBodyID) {
     ChildShapes[childShapeID] = new ChildShape(info);
 
     select("ChildShape", childShapeID);
+
+    return childShapeID;
 }
 
 function onPointerMove(event) {
@@ -571,15 +573,7 @@ button_select_game_info.addEventListener('click', function(evt) {
 });
 
 button_delete.addEventListener('click', function(evt) {
-    if (selected.type=="ChildShape") {
-        let objectID = selected.objectID;
-        deselect();
-        ChildShapes[objectID].delete();
-    } else if (selected.type=="RigidBody") {
-        let objectID = selected.objectID;
-        deselect();
-        RigidBodies[objectID].delete();
-    }
+    deleteSelected()
 });
 
 button_select_body.addEventListener('click', function(evt) {
@@ -694,19 +688,19 @@ input_position_z_float.addEventListener('input', function(evt) {
 
 input_rotation_x_float.addEventListener('input', function(evt) {
     if (selected.type!="RigidBody") return;
-    RigidBodies[selected.objectID].rotation.x = input_rotation_x_float.value*1;
+    RigidBodies[selected.objectID].rotation.x = input_rotation_x_float.value*Math.PI/180;
     RigidBodies[selected.objectID].updateRotation();
 });
 
 input_rotation_y_float.addEventListener('input', function(evt) {
     if (selected.type!="RigidBody") return;
-    RigidBodies[selected.objectID].rotation.y = input_rotation_y_float.value*1;
+    RigidBodies[selected.objectID].rotation.y = input_rotation_y_float.value*Math.PI/180;
     RigidBodies[selected.objectID].updateRotation();
 });
 
 input_rotation_z_float.addEventListener('input', function(evt) {
     if (selected.type!="RigidBody") return;
-    RigidBodies[selected.objectID].rotation.z = input_rotation_z_float.value*1;
+    RigidBodies[selected.objectID].rotation.z = input_rotation_z_float.value*Math.PI/180;
     RigidBodies[selected.objectID].updateRotation();
 });
 
@@ -736,14 +730,26 @@ function animate() {
 
 // Main code
 
+function deleteSelected() {
+    if (selected.type=="ChildShape") {
+        let objectID = selected.objectID;
+        deselect();
+        ChildShapes[objectID].delete();
+    } else if (selected.type=="RigidBody") {
+        let objectID = selected.objectID;
+        deselect();
+        RigidBodies[objectID].delete();
+    }
+}
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
-main_view.appendChild(renderer.domElement);
+const canvas = main_view.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, canvas);
 
 camera.position.z = 5;
 
@@ -798,6 +804,64 @@ const SQL = await initSqlJs({
 scene.background = new THREE.Color(0x7eafec);
 camera.far = 20000;
 
+
+function copyElement(evt) {
+    if (selected.type=="ChildShape") {
+        let childs = [];
+
+        let childShape = ChildShapes[selected.objectID];
+        childs[0]={};
+        childs[0].color = "#"+childShape.color.toString(16);
+        childs[0].pos = childShape.position;
+        childs[0].shapeId = childShape.UUID;
+        if (childShape.type=="block") childs[0].bounds = childShape.size;
+
+        event.clipboardData.setData("text/plain", JSON.stringify({childs: childs}));
+        event.preventDefault();
+    }
+}
+
+window.addEventListener("cut", function(evt) {
+    if (document.activeElement!=document.body) return;
+    copyElement(evt);
+    if (selected.type=="ChildShape") deleteSelected();
+});
+
+window.addEventListener("copy", function(evt) {
+    if (document.activeElement!=document.body) return;
+    copyElement(evt);
+});
+
+window.addEventListener("paste", function(evt) {
+    if (document.activeElement!=document.body) return;
+    if (selected.type=="ChildShape"||selected.type=="RigidBody") {
+        event.preventDefault();
+        let bodyId = 0;
+        let childData;
+        try {
+            let selectionString = event.clipboardData.getData("text");
+            if (selected.type=="ChildShape") {
+                bodyId = ChildShapes[selected.objectID].bodyID;
+            } else {
+                bodyId = selected.objectID;
+            }
+
+            childData = JSON.parse(selectionString).childs[0];
+        } catch (e) {
+            return;
+        }
+
+        let childShapeID = createChildShape("block", bodyId);
+        ChildShapes[childShapeID].color = parseInt(childData.color.slice(1), 16)
+        ChildShapes[childShapeID].position = childData.pos
+        ChildShapes[childShapeID].UUID = childData.shapeId
+        ChildShapes[childShapeID].size = childData.bounds
+
+        ChildShapes[childShapeID].createMesh();
+
+        select("ChildShape", childShapeID);
+    }
+});
 
 open_file_button.onchange = () => {
     const f = open_file_button.files[0];
