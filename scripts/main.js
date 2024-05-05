@@ -3,136 +3,15 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+import { ChildShape } from "child_shape";
+import { updateSelectedDatabase } from "utils";
+
 // Classes
 
 class selection {
     constructor(type, objectID) {
         this.type = type;
         this.objectID = objectID;
-    }
-}
-
-class ChildShape {
-    createMesh() {
-        if (this.mesh != undefined) {
-            RigidBodies[this.bodyID].group.remove(this.mesh);
-            this.mesh.remove();
-        }
-
-        let geometry;
-
-        const material = new THREE.MeshLambertMaterial({
-            color: this.color
-        });
-
-        if (this.type == "block") {
-            geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
-            this.mesh = new THREE.Mesh(geometry, material);
-        } else if (this.type == "part") {
-            this.mesh = unknownModel.scene.clone();
-        }
-
-        // Convert to a different coordinate system
-        this.mesh.position.y = this.position.x;
-        this.mesh.position.z = this.position.y;
-        this.mesh.position.x = -this.position.z;
-
-        if (this.type == "block") {
-            this.mesh.position.y += this.size.x / 2;
-            this.mesh.position.z += this.size.y / 2;
-            this.mesh.position.x -= this.size.z / 2;
-        }
-
-        this.mesh.ChildShapeID = this.id;
-
-        RigidBodies[this.bodyID].group.add(this.mesh);
-    }
-
-    updateDatabase() {
-        //partType
-        if (this.type == "block") this.data[1] = 0x1f;
-        if (this.type == "part") this.data[1] = 0x20;
-
-        //color
-        let color = this.color
-        let blue = color%256;
-        color = (color-blue)/256;
-        let green = color%256;
-        color = (color-green)/256;
-        let red = color;
-
-        this.data[40] = red;
-        this.data[39] = green;
-        this.data[38] = blue;
-
-        let i = 0;
-        let UUID_position = 26;
-        while (i < 36) {
-            this.data[UUID_position--]=parseInt(this.UUID[i]+this.UUID[i+1], 16);
-			if (i==6||i==11||i==16||i==21) i+=3;
-            else i+=2;
-        }
-
-        //position
-
-        writeInt16ToData(this.data, 35, this.position.x);
-        writeInt16ToData(this.data, 33, this.position.y);
-        writeInt16ToData(this.data, 31, this.position.z);
-
-
-        if (this.type=="block") {
-            //size
-            this.data[0x2E] = this.size.x;
-            this.data[0x2C] = this.size.y;
-            this.data[0x2A] = this.size.z;
-        } else {
-            //rotation (assuming type is part) TODO
-        }
-
-        let statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
-        statement.run([this.data, this.id]);
-    }
-
-    delete() {
-        RigidBodies[this.bodyID].group.remove(this.mesh);
-        RigidBodies[this.bodyID].removeChildShape(this.id);
-        this.mesh.remove();
-        let statement = db.prepare("DELETE FROM ChildShape WHERE id = ?;");
-        statement.run([this.id]);
-    }
-    
-    constructor(data) {
-        this.data = data[2];
-        this.id = data[0];
-        this.bodyID = data[1];
-        this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
-
-        RigidBodies[this.bodyID].addChildShape(this.id);
-
-        this.UUID = readUUID(data[2],26);
-        
-        let partType = data[2][1];
-        if (partType == 0x1f) {
-            this.type = "block";
-            this.size = {
-                x: data[2][0x2E], 
-                y: data[2][0x2C], 
-                z: data[2][0x2A] 
-            };
-        } else if (partType == 0x20) {
-            this.type = "part";
-            this.rotation = data[2][41];
-        }
-
-
-        this.position = {
-            x: readInt16FromData(data[2], 35),
-            y: readInt16FromData(data[2], 33),
-            z: readInt16FromData(data[2], 31)
-        }
-
-
-        this.createMesh();
     }
 }
 
@@ -282,6 +161,7 @@ class gameInfo {
         this.mods = data[4];
         this.uniqueIds = data[5];
 
+        console.log(data);
         this.ChildShapeID = data[5][15] + (data[5][14]<<8) + (data[5][13]<<16) + (data[5][12]<<24);
 
         this.modList = Array((this.mods[0]<<24)+(this.mods[1]<<16)+(this.mods[2]<<8)+this.mods[3]);
@@ -430,49 +310,6 @@ function deselect() {
     }
 
     selected = new selection("none", 0);
-}
-
-function updateSelectedDatabase() {
-    if (selected.type=="GameInfo") {
-        Game.updateDatabase();
-    } else if (selected.type=="ChildShape") {
-        ChildShapes[selected.objectID].updateDatabase();
-    } else if (selected.type=="RigidBody") {
-        RigidBodies[selected.objectID].updateDatabase();
-    }
-}
-
-function writeFloatToData(data, location, float) {
-    const view = new DataView(data.buffer, location);
-    view.setFloat32(0, float);
-}
-
-function readFloatFromData(data, location) {
-    const view = new DataView(data.buffer, location);
-    return view.getFloat32(0);
-}
-
-function writeInt16ToData(data, location, int) {
-    const view = new DataView(data.buffer, location);
-    view.setInt16(0, int);
-}
-
-function readInt16FromData(data, location) {
-    const view = new DataView(data.buffer, location);
-    return view.getInt16(0);
-}
-
-
-
-function readUUID(data, location) {
-    let UUID = "";
-    for (let i = 0; i < 16; i++) {
-        UUID += data[location-i].toString(16).padStart(2, '0');
-        if (i === 3 || i === 5 || i === 7 || i === 9) {
-            UUID += "-";
-        }
-    }
-    return UUID;
 }
 
 function createChildShape(type, rigidBodyID) {
