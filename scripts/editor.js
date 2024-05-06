@@ -49,8 +49,8 @@ class Editor {
         this.seed = gameData[2];
         this.gameInfo = new GameInfo(gameData);
 
-        const childShapeData = db.exec("SELECT * FROM ChildShape;")[0].values;
-        const rigidBodyData = db.exec("SELECT * FROM RigidBody;")[0].values;
+        const childShapeData = this.db.exec("SELECT * FROM ChildShape;")[0].values;
+        const rigidBodyData = this.db.exec("SELECT * FROM RigidBody;")[0].values;
         for (let i = 0; i < childShapeData.length; i++) {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
         }
@@ -208,7 +208,7 @@ class Editor {
             this.childShapes[selected.objectID].mesh.material.color = new THREE.Color(this.childShapes[selected.objectID].color);
         }
 
-        this.selected = new Selection("none", 0);
+        this.selected = new Selection(SelectionType.NONE, 0);
     }
 }
 

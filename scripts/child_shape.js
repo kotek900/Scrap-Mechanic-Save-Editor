@@ -1,3 +1,6 @@
+import { editor } from "editor";
+import { readUUID } from "utils";
+
 // Fake "enum"
 export const PartType = {
     BLOCK: 0x1f,
@@ -13,7 +16,7 @@ export class ChildShape {
         this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
         this.partType = data[2][1];
 
-        RigidBodies[this.bodyID].addChildShape(this.id);
+        editor.rigidBodies[this.bodyID].addChildShape(this.id);
 
         switch(this.partType) {
         case PartType.BLOCK:
