@@ -1,4 +1,5 @@
 import { ChildShape } from "child_shape";
+import { GameInfo } from "game_info";
 import { RigidBody } from "rigid_body";
 
 const SQL = await initSqlJs({
@@ -25,6 +26,7 @@ class Editor {
         this.childShapes = [];
         this.rigidBodies = [];
         this.db = null;
+        this.gameInfo = null;
         // Save information
         this.gameVersion = 0;
         this.gameTick = 0;
@@ -44,6 +46,7 @@ class Editor {
         this.gameVersion = gameData[0];
         this.gameTick = gameData[3];
         this.seed = gameData[2];
+        this.gameInfo = new GameInfo(gameData);
 
         const childShapeData = db.exec("SELECT * FROM ChildShape;")[0].values;
         const rigidBodyData = db.exec("SELECT * FROM RigidBody;")[0].values;
