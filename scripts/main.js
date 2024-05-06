@@ -4,113 +4,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { ChildShape } from "child_shape";
+import { editor } from "editor";
 import { updateSelectedDatabase } from "utils";
 
 // Classes
-
-class selection {
-    constructor(type, objectID) {
-        this.type = type;
-        this.objectID = objectID;
-    }
-}
-
-class RigidBody {
-    updateDatabase() {
-
-        writeFloatToData(this.data, 0x2B, this.position.x);
-        writeFloatToData(this.data, 0x2F, this.position.y);
-        writeFloatToData(this.data, 0x33, this.position.z);
-
-
-        // TODO save rotation data
-
-        let statement = db.prepare("UPDATE RigidBody SET data = ? WHERE id = ?;");
-        statement.run([this.data, this.id]);
-    }
-
-    addChildShape(id) {
-        this.ChildShapes.push(id);
-    }
-
-    removeChildShape(id) {
-        let index = this.ChildShapes.find((element) => element == id);
-        this.ChildShapes.splice(index, 1);
-    }
-
-    delete() {
-        while (this.ChildShapes.length>0) {
-            let ID = this.ChildShapes[this.ChildShapes.length-1];
-            ChildShapes[ID].delete();
-            this.ChildShapes.pop();
-        }
-        let statement = db.prepare("DELETE FROM RigidBody WHERE id = ?;");
-        statement.run([this.id]);
-    }
-
-    updatePosition() {
-        this.group.position.set(-this.position.x, this.position.z, this.position.y);
-    }
-
-    updateRotation() {
-        this.group.rotation.set(0,0,0);
-
-        let rotationX = this.rotation.x;
-        let rotationY = this.rotation.y;
-        let rotationZ = this.rotation.z;
-
-        if (!(rotationX==0&&rotationY==0&&rotationZ==0)) {
-
-            let axis = new THREE.Vector3(0, 1, 0);
-            this.group.rotateOnWorldAxis(axis, -rotationX);
-
-            axis = new THREE.Vector3(0, 0, 1);
-            this.group.rotateOnWorldAxis(axis, rotationY);
-
-            axis = new THREE.Vector3(1, 0, 0);
-            this.group.rotateOnWorldAxis(axis, rotationZ+Math.PI);
-
-        }
-    }
-
-    constructor(data) {
-        this.data = data[2];
-        this.id = data[0];
-        this.worldID = data[1];
-
-
-
-        this.position = {
-            x: readFloatFromData(data[2], 0x2B),
-            y: readFloatFromData(data[2], 0x2F),
-            z: readFloatFromData(data[2], 0x33)
-        }
-
-        let QA = readFloatFromData(data[2], 27);
-        let QB = readFloatFromData(data[2], 31);
-        let QC = readFloatFromData(data[2], 35);
-        let QD = readFloatFromData(data[2], 39);
-
-        this.group = new THREE.Group();
-
-        this.group.scale.set(1/4, 1/4, 1/4);
-
-        this.group.position.set(-this.position.x, this.position.z, this.position.y);
-        this.group.quaternion.set(QB, QC, QD, QA);
-
-        let rotationX = this.group.rotation.x;
-        let rotationY = this.group.rotation.y;
-        let rotationZ = this.group.rotation.z;
-
-        this.rotation = { x: rotationX, y: rotationY, z: rotationZ };
-
-        this.updateRotation();
-
-        this.ChildShapes = [];
-
-        scene.add(this.group);
-    }
-}
 
 let Game;
 
@@ -581,7 +478,6 @@ function deleteSelected() {
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
-
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
 const canvas = main_view.appendChild(renderer.domElement);
@@ -592,10 +488,6 @@ camera.position.z = 5;
 
 let db;
 
-let ChildShapes = [];
-let RigidBodies = [];
-
-let selected = new selection("none", 0);
 deselect();
 
 const raycaster = new THREE.Raycaster();
@@ -633,10 +525,6 @@ main_view.children[1].onclick = function() {
 }
 
 animate();
-
-const SQL = await initSqlJs({
-    locateFile: file => `https://sql.js.org/dist/${file}`
-});
 
 scene.background = new THREE.Color(0x7eafec);
 camera.far = 20000;
@@ -717,29 +605,16 @@ open_file_button.onchange = () => {
         const light = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(light);
 
-        const Uints = new Uint8Array(r.result);
-        db = new SQL.Database(Uints);
-
-        let gameData = db.exec("SELECT * FROM Game;")[0].values[0];
-        let gameversion = gameData[0];
-        let seed = gameData[2];
-        let gametick = gameData[3];
+        editor.afterSaveLoad(r);
 
         Game = new gameInfo(gameData);
 
-        info_gameversion.textContent = "Version: " + gameversion;
-        info_seed.textContent = "Seed: " + seed;
-        info_gametick.textContent = "Tick: " + gametick;
-
-        let ChildShapeData = db.exec("SELECT * FROM ChildShape;")[0].values;
-        let RigidBodyData = db.exec("SELECT * FROM RigidBody;")[0].values;
-
-        for (let i = 0; i < RigidBodyData.length; i++) {
-            RigidBodies[RigidBodyData[i][0]] = new RigidBody(RigidBodyData[i]);
-        }
-        for (let i = 0; i < ChildShapeData.length; i++) {
-            ChildShapes[ChildShapeData[i][0]] = new ChildShape(ChildShapeData[i]);
-        }
+        const infoGameVersion = document.getElementById("info_gameversion");
+        const infoSeed = document.getElementById("info_gameSeed");
+        const infoGameTick = document.getElementById("info_gameTick");
+        infoGameVersion.textContent = "Version: " + editor.gameVersion;
+        infoSeed.textContent = "Seed: " + editor.seed;
+        infoGameTick.textContent = "Tick: " + editor.gameTick;
 
         deselect();
     }
