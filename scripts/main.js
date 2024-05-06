@@ -3,90 +3,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-import { ChildShape } from "child_shape";
-import { editor } from "editor";
+import { ChildShape, PartType } from "child_shape";
+import { editor, SelectionType } from "editor";
 
 // Functions
-
-function select(type, objectID) {
-    deselect();
-
-    selected = new selection(type, objectID);
-
-    if (type!="none"&&type!="GameInfo") {
-        input_box_buttons.style.display = "block";
-    }
-
-    if (type=="GameInfo") {
-        GameInfo_menu.style.display = "block";
-        info_selected.textContent = "Game Info";
-
-        input_seed.value = Game.seed;
-        input_tick.value = Game.gametick;
-        input_version.value = Game.savegameversion;
-    }
-    if (type=="ChildShape") {
-        ChildShape_menu.style.display = "block";
-        info_selected.textContent = ChildShapes[objectID].type + " ID: " + objectID;
-
-        button_select_body.style.display = "inline-block";
-
-        //size only applies to blocks and not parts
-        if (ChildShapes[objectID].type=="block") {
-            input_size.style.display = "block";
-
-            input_size_x.value = ChildShapes[objectID].size.x;
-            input_size_y.value = ChildShapes[objectID].size.y;
-            input_size_z.value = ChildShapes[objectID].size.z;
-        } else {
-            input_size.style.display = "none";
-        }
-
-        selected_color_picker.value = "#" + ChildShapes[objectID].color.toString(16).padStart(6, '0');
-        selected_UUID.value = ChildShapes[objectID].UUID;
-
-        input_position_x.value = ChildShapes[objectID].position.x;
-        input_position_y.value = ChildShapes[objectID].position.y;
-        input_position_z.value = ChildShapes[objectID].position.z;
-    } else if (type=="RigidBody") {
-        RigidBody_menu.style.display = "block";
-        info_selected.textContent = "Rigid body ID: " + objectID;
-
-        button_create_block.style.display = "inline-block";
-
-        input_position_x_float.value = RigidBodies[objectID].position.x;
-        input_position_y_float.value = RigidBodies[objectID].position.y;
-        input_position_z_float.value = RigidBodies[objectID].position.z;
-
-        input_rotation_x_float.value = RigidBodies[objectID].rotation.x;
-        input_rotation_y_float.value = RigidBodies[objectID].rotation.y;
-        input_rotation_z_float.value = RigidBodies[objectID].rotation.z;
-    }
-}
-
-function deselect() {
-    info_selected.textContent = "none";
-
-    GameInfo_menu.style.display = "none";
-    ChildShape_menu.style.display = "none";
-    RigidBody_menu.style.display = "none";
-
-    button_select_body.style.display = "none";
-    button_create_block.style.display = "none";
-
-    input_box_buttons.style.display = "none";
-
-    editor.updateSelectedDatabase();
-
-    if (selected.type=="ChildShape") {
-        if (ChildShapes[selected.objectID].type=="block") {
-            //reset the color
-            ChildShapes[selected.objectID].mesh.material.color = new THREE.Color(ChildShapes[selected.objectID].color);
-        }
-    }
-
-    selected = new selection("none", 0);
-}
 
 function createChildShape(type, rigidBodyID) {
     let data = new Uint8Array(47);
@@ -323,18 +243,13 @@ function animate() {
 
     raycaster.setFromCamera(pointer, camera);
 
-
     let time = new Date();
-
     let selectionColor = new THREE.Color("white");
-
     selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
 
-    if (selected.type=="ChildShape") {
-        if (ChildShapes[selected.objectID].type=="block") {
-            selectionColor.lerp(new THREE.Color(ChildShapes[selected.objectID].color), 0.2);
-            ChildShapes[selected.objectID].mesh.material.color = selectionColor;
-        }
+    if (editor.selected.type==SelectionType.CHILD_SHAPE && editor.childShapes[selected.objectID].type==PartType.BLOCK) {
+        selectionColor.lerp(new THREE.Color(ChildShapes[selected.objectID].color), 0.2);
+        this.childShapes[selected.objectID].mesh.material.color = selectionColor;
     }
 
     renderer.render(scene, camera);
@@ -365,9 +280,7 @@ const controls = new OrbitControls(camera, canvas);
 
 camera.position.z = 5;
 
-let db;
-
-deselect();
+editor.deselect();
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -493,7 +406,7 @@ open_file_button.onchange = () => {
         infoSeed.textContent = "Seed: " + editor.seed;
         infoGameTick.textContent = "Tick: " + editor.gameTick;
 
-        deselect();
+        editor.deselect();
     }
     r.readAsArrayBuffer(f);
 }

@@ -1,5 +1,5 @@
 // Fake "enum"
-const PartType = {
+export const PartType = {
     BLOCK: 0x1f,
     PART: 0x20
 };
