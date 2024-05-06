@@ -5,6 +5,13 @@ const SQL = await initSqlJs({
     locateFile: file => `https://sql.js.org/dist/${file}`
 });
 
+// Fake "enum"
+export const SelectionType = {
+    GAME_INFO: 0,
+    CHILD_SHAPE: 1,
+    RIGID_BODY: 2
+};
+
 class Selection {
     constructor(type, objectID) {
         this.type = type;
@@ -45,6 +52,24 @@ class Editor {
         }
         for (let i = 0; i < childShapeData.length; i++) {
             this.rigidBodies[rigidBodyData[i][0]] = new RigidBody(rigidBodyData[i]);
+        }
+    }
+
+    updateSelectedDatabase() {
+        switch(this.selected.type) {
+        case SelectionType.GAME_INFO:
+            Game.updateDatabase();
+            break;
+        case SelectionType.CHILD_SHAPE:
+            this.childShapes[this.selected.objectID].updateDatabase();
+            break;
+        case SelectionType.RIGID_BODY:
+            this.rigidBodies[this.selected.objectID].updateDatabase();
+            break;
+        default:
+            // assert not reached
+            console.assert(false);
+            break;
         }
     }
 }

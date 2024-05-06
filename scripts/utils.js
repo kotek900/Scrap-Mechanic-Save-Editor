@@ -1,13 +1,3 @@
-export function updateSelectedDatabase() {
-    if (selected.type=="GameInfo") {
-        Game.updateDatabase();
-    } else if (selected.type=="ChildShape") {
-        ChildShapes[selected.objectID].updateDatabase();
-    } else if (selected.type=="RigidBody") {
-        RigidBodies[selected.objectID].updateDatabase();
-    }
-}
-
 export function writeFloatToData(data, location, float) {
     const view = new DataView(data.buffer, location);
     view.setFloat32(0, float);

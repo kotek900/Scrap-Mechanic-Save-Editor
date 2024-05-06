@@ -5,7 +5,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { ChildShape } from "child_shape";
 import { editor } from "editor";
-import { updateSelectedDatabase } from "utils";
 
 // Classes
 
@@ -197,7 +196,7 @@ function deselect() {
 
     input_box_buttons.style.display = "none";
 
-    updateSelectedDatabase();
+    editor.updateSelectedDatabase();
 
     if (selected.type=="ChildShape") {
         if (ChildShapes[selected.objectID].type=="block") {
@@ -294,7 +293,7 @@ save_file_button.addEventListener('mouseenter', function(evt) {
 
     if (db==undefined) return;
 
-    updateSelectedDatabase();
+    editor.updateSelectedDatabase();
 
     let data = db.export();
     let dataBlob = new Blob([data]);
