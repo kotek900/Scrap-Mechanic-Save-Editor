@@ -1,3 +1,5 @@
+import { readUUID } from "utils";
+
 export class GameInfo {
     constructor(data) {
         this.saveGameVersion = data[0];
