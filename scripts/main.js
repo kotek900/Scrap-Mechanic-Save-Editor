@@ -252,7 +252,7 @@ function animate() {
         this.childShapes[selected.objectID].mesh.material.color = selectionColor;
     }
 
-    renderer.render(scene, camera);
+    renderer.render(editor.scene, camera);
 }
 
 
@@ -270,15 +270,15 @@ function deleteSelected() {
     }
 }
 
-const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
+camera.far = 20000;
+camera.position.z = 5;
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
 const canvas = main_view.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, canvas);
-
-camera.position.z = 5;
 
 editor.deselect();
 
@@ -308,7 +308,7 @@ main_view.children[1].addEventListener('pointermove', onPointerMove);
 main_view.children[1].addEventListener('pointerdown', onPointerDown);
 
 main_view.children[1].onclick = function() {
-    const intersects = raycaster.intersectObjects(scene.children);
+    const intersects = raycaster.intersectObjects(editor.scene.children);
     if (!mouseCanSelectObject) return;
     if (intersects.length == 0) return;
     if (intersects[0].object.ChildShapeID == undefined) return;
@@ -317,10 +317,6 @@ main_view.children[1].onclick = function() {
 }
 
 animate();
-
-scene.background = new THREE.Color(0x7eafec);
-camera.far = 20000;
-
 
 function copyElement(evt) {
     if (selected.type=="ChildShape") {
@@ -384,19 +380,6 @@ open_file_button.onchange = () => {
     const f = open_file_button.files[0];
     const r = new FileReader();
     r.onload = function() {
-        // remove all objects from the scene
-        while (scene.children.length > 0) {
-            scene.remove(scene.children[0]);
-        }
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-        directionalLight.position.x = 2 / 3;
-        directionalLight.position.z = 1 / 3;
-        scene.add(directionalLight);
-
-        const light = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(light);
-
         editor.afterSaveLoad(r);
 
         const infoGameVersion = document.getElementById("info_gameversion");

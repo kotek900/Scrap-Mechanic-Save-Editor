@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 
+import { editor } from "editor";
 import { readFloatFromData } from "utils";
 
 export class RigidBody {
@@ -32,7 +33,7 @@ export class RigidBody {
         };
 
         this.updateRotation();
-        scene.add(this.group);
+        editor.scene.add(this.group);
     }
 
     delete() {

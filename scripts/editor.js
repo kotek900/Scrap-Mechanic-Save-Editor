@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 import { ChildShape, PartType } from "child_shape";
 import { GameInfo } from "game_info";
 import { RigidBody } from "rigid_body";
@@ -28,6 +30,10 @@ class Editor {
         this.rigidBodies = [];
         this.db = null;
         this.gameInfo = null;
+
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x7eafec);
+
         // Save information
         this.gameVersion = 0;
         this.gameTick = 0;
@@ -35,6 +41,7 @@ class Editor {
     }
 
     afterSaveLoad(reader) {
+        this.prepareScene();
         if(this.db)
             this.db.free();
         this.rigidBodies.length = 0;
@@ -49,14 +56,29 @@ class Editor {
         this.seed = gameData[2];
         this.gameInfo = new GameInfo(gameData);
 
-        const childShapeData = this.db.exec("SELECT * FROM ChildShape;")[0].values;
         const rigidBodyData = this.db.exec("SELECT * FROM RigidBody;")[0].values;
+        const childShapeData = this.db.exec("SELECT * FROM ChildShape;")[0].values;
+        for (let i = 0; i < rigidBodyData.length; i++) {
+            this.rigidBodies[rigidBodyData[i][0]] = new RigidBody(rigidBodyData[i]);
+        }
         for (let i = 0; i < childShapeData.length; i++) {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
         }
-        for (let i = 0; i < childShapeData.length; i++) {
-            this.rigidBodies[rigidBodyData[i][0]] = new RigidBody(rigidBodyData[i]);
+    }
+
+    prepareScene() {
+        // remove all objects from the scene
+        while(this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0]);
         }
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        directionalLight.position.x = 2 / 3;
+        directionalLight.position.z = 1 / 3;
+        this.scene.add(directionalLight);
+
+        const light = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(light);
     }
 
     updateSelectedDatabase() {
