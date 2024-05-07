@@ -1,5 +1,8 @@
+import * as THREE from 'three';
+
 import { editor } from "editor";
-import { readUUID } from "utils";
+import { resourceManager } from "resource_manager";
+import { readUUID, readInt16FromData } from "utils";
 
 // Fake "enum"
 export const PartType = {
@@ -41,16 +44,16 @@ export class ChildShape {
     }
 
     delete() {
-        RigidBodies[this.bodyID].group.remove(this.mesh);
-        RigidBodies[this.bodyID].removeChildShape(this.id);
+        editor.rigidBodies[this.bodyID].group.remove(this.mesh);
+        editor.rigidBodies[this.bodyID].removeChildShape(this.id);
         this.mesh.remove();
-        let statement = db.prepare("DELETE FROM ChildShape WHERE id = ?;");
+        const statement = db.prepare("DELETE FROM ChildShape WHERE id = ?;");
         statement.run([this.id]);
     }
 
     createMesh() {
         if (this.mesh != undefined) {
-            RigidBodies[this.bodyID].group.remove(this.mesh);
+            this.rigidBodies[this.bodyID].group.remove(this.mesh);
             this.mesh.remove();
         }
 
@@ -64,7 +67,7 @@ export class ChildShape {
             this.mesh = new THREE.Mesh(geometry, material);
             break;
         case PartType.PART:
-            this.mesh = unknownModel.scene.clone();
+            this.mesh = resourceManager.unknownModel.scene.clone();
             break;
         }
 
@@ -79,9 +82,9 @@ export class ChildShape {
             this.mesh.position.x -= this.size.z / 2;
         }
 
-        this.mesh.ChildShapeID = this.id;
+        this.mesh.childShapeID = this.id;
 
-        RigidBodies[this.bodyID].group.add(this.mesh);
+        editor.rigidBodies[this.bodyID].group.add(this.mesh);
     }
 
     updateDatabase() {

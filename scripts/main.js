@@ -1,7 +1,6 @@
 // Import
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { ChildShape, PartType } from "child_shape";
 import { editor, SelectionType } from "editor";
@@ -289,21 +288,6 @@ let mouseCanSelectObject = false;
 
 window.addEventListener('resize', onWindowResize);
 
-const loader = new GLTFLoader();
-
-let unknownModel;
-
-loader.load(
-    'unknown.glb', 
-    function(gltf) {
-        unknownModel = gltf;
-    }, 
-    undefined, 
-    function(error) {
-        console.error(error);
-    }
-);
-
 main_view.children[1].addEventListener('pointermove', onPointerMove);
 main_view.children[1].addEventListener('pointerdown', onPointerDown);
 
@@ -383,8 +367,8 @@ open_file_button.onchange = () => {
         editor.afterSaveLoad(r);
 
         const infoGameVersion = document.getElementById("info_gameversion");
-        const infoSeed = document.getElementById("info_gameSeed");
-        const infoGameTick = document.getElementById("info_gameTick");
+        const infoSeed = document.getElementById("info_seed");
+        const infoGameTick = document.getElementById("info_gametick");
         infoGameVersion.textContent = "Version: " + editor.gameVersion;
         infoSeed.textContent = "Seed: " + editor.seed;
         infoGameTick.textContent = "Tick: " + editor.gameTick;
