@@ -1,3 +1,4 @@
+import { editor } from "editor";
 import { readUUID } from "utils";
 
 export class GameInfo {
@@ -5,7 +6,7 @@ export class GameInfo {
         this.saveGameVersion = data[0];
         this.flags = data[1];
         this.seed = data[2];
-        this.gametick = data[3];
+        this.gameTick = data[3];
         this.mods = data[4];
         this.uniqueIds = data[5];
         this.childShapeID = data[5][15] + (data[5][14]<<8) + (data[5][13]<<16) + (data[5][12]<<24);
@@ -83,8 +84,8 @@ export class GameInfo {
     }
 
     updateDatabase() {
-        let statement = db.prepare("UPDATE Game SET savegameversion = ?, seed = ?, gametick = ?;");
-        statement.run([this.savegameversion, this.seed, this.gametick]);
+        let statement = editor.db.prepare("UPDATE Game SET savegameversion = ?, seed = ?, gametick = ?;");
+        statement.run([this.saveGameVersion, this.seed, this.gameTick]);
 
         let modData = new Uint8Array(this.modList.length*24+4);
     
@@ -108,7 +109,7 @@ export class GameInfo {
             }
         }
 
-        statement = db.prepare("UPDATE Game SET mods = ?;");
+        statement = editor.db.prepare("UPDATE Game SET mods = ?;");
         statement.run([modData]);
         this.mods = modData;
     }
