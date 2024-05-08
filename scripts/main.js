@@ -105,7 +105,7 @@ window.addEventListener("cut", function(event) {
     if (document.activeElement!=document.body)
         return;
     copyElement(event);
-    if (selected.type==SelectionType.CHILD_SHAPE)
+    if (editor.selected.type==SelectionType.CHILD_SHAPE)
         deleteSelected();
 });
 

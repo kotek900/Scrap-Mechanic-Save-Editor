@@ -79,7 +79,7 @@ export class GameInfo {
         this.uniqueIds[13] = (this.childShapeID>>16)%256;
         this.uniqueIds[12] = (this.childShapeID>>24)%256;
 
-        let statement = db.prepare("UPDATE Game SET uniqueIds = ?;");
+        const statement = editor.db.prepare("UPDATE Game SET uniqueIds = ?;");
         statement.run([this.uniqueIds]);
     }
 
