@@ -311,18 +311,16 @@ function animate() {
 
     raycaster.setFromCamera(pointer, camera);
 
-    let time = new Date();
-    let selectionColor = new THREE.Color("white");
-    selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
-
-    if (editor.selected.type==SelectionType.CHILD_SHAPE && editor.childShapes[selected.objectID].type==PartType.BLOCK) {
-        selectionColor.lerp(new THREE.Color(ChildShapes[selected.objectID].color), 0.2);
-        editor.childShapes[selected.objectID].mesh.material.color = selectionColor;
+    if (editor.selected.type==SelectionType.CHILD_SHAPE && editor.childShapes[editor.selected.objectID].type==PartType.BLOCK) {
+        const time = new Date();
+        const selectionColor = new THREE.Color("white");
+        selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
+        selectionColor.lerp(new THREE.Color(editor.childShapes[editor.selected.objectID].color), 0.2);
+        editor.childShapes[editor.selected.objectID].mesh.material.color = selectionColor;
     }
 
     renderer.render(editor.scene, camera);
 }
-
 
 // Main code
 
@@ -358,9 +356,11 @@ main_view.children[1].addEventListener('pointerdown', function() {
 
 main_view.children[1].onclick = function() {
     const intersects = raycaster.intersectObjects(editor.scene.children);
-    if (!mouseCanSelectObject || intersects.length == 0 || intersects[0].object.hasOwnProperty("childShapeID"))
+    if (!mouseCanSelectObject || intersects.length == 0 || !intersects[0].object.hasOwnProperty("childShapeID")) {
+        editor.deselect();
         return;
-    select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
+    }
+    editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
 }
 
 animate();

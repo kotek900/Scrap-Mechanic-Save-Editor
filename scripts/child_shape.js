@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import { editor } from "editor";
 import { resourceManager } from "resource_manager";
-import { readUUID, readInt16FromData } from "utils";
+import { readUUID, readInt16FromData, writeInt16ToData } from "utils";
 
 // Fake "enum"
 export const PartType = {
@@ -17,11 +17,11 @@ export class ChildShape {
         this.uuid = readUUID(data[2], 26);
         this.data = data[2];
         this.color = (data[2][40] << 16) + (data[2][39] << 8) + data[2][38];
-        this.partType = data[2][1];
+        this.type = data[2][1];
 
         editor.rigidBodies[this.bodyID].addChildShape(this.id);
 
-        switch(this.partType) {
+        switch(this.type) {
         case PartType.BLOCK:
             this.size = {
                 x: data[2][0x2E], 
@@ -61,7 +61,7 @@ export class ChildShape {
             color: this.color
         });
 
-        switch(this.partType) {
+        switch(this.type) {
         case PartType.BLOCK:
             const geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
             this.mesh = new THREE.Mesh(geometry, material);
@@ -76,7 +76,7 @@ export class ChildShape {
         this.mesh.position.z = this.position.y;
         this.mesh.position.x = -this.position.z;
 
-        if (this.partType == PartType.BLOCK) {
+        if (this.type == PartType.BLOCK) {
             this.mesh.position.y += this.size.x / 2;
             this.mesh.position.z += this.size.y / 2;
             this.mesh.position.x -= this.size.z / 2;
@@ -89,7 +89,7 @@ export class ChildShape {
 
     updateDatabase() {
         // partType
-        this.data[1] = this.partType;
+        this.data[1] = this.type;
 
         // color
         let color = this.color
@@ -115,7 +115,7 @@ export class ChildShape {
         writeInt16ToData(this.data, 33, this.position.y);
         writeInt16ToData(this.data, 31, this.position.z);
 
-        switch(this.partType) {
+        switch(this.type) {
         case PartType.BLOCK:
             //size
             this.data[0x2E] = this.size.x;
@@ -129,7 +129,7 @@ export class ChildShape {
             break;
         }
 
-        let statement = db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
+        const statement = editor.db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
     }
 }

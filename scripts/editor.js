@@ -157,7 +157,7 @@ class Editor {
             selectedColorPicker.value = "#" + this.childShapes[objectID].color.toString(16).padStart(6, '0');
 
             const selectedUUID = document.getElementById("selected_UUID");
-            selectedUUID.value = this.childShapes[objectID].UUID;
+            selectedUUID.value = this.childShapes[objectID].uuid;
 
             const inputPositionX = document.getElementById("input_position_x");
             inputPositionX.value = this.childShapes[objectID].position.x;
@@ -226,8 +226,8 @@ class Editor {
 
         this.updateSelectedDatabase();
 
-        if (this.selected.type==SelectionType.CHILD_SHAPE && ChildShapes[selected.objectID].type==PartType.BLOCK) {
-            this.childShapes[selected.objectID].mesh.material.color = new THREE.Color(this.childShapes[selected.objectID].color);
+        if (this.selected.type==SelectionType.CHILD_SHAPE && this.childShapes[this.selected.objectID].type==PartType.BLOCK) {
+            this.childShapes[this.selected.objectID].mesh.material.color = new THREE.Color(this.childShapes[this.selected.objectID].color);
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);
