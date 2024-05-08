@@ -356,10 +356,8 @@ main_view.children[1].addEventListener('pointerdown', function() {
 
 main_view.children[1].onclick = function() {
     const intersects = raycaster.intersectObjects(editor.scene.children);
-    if (!mouseCanSelectObject || intersects.length == 0 || !intersects[0].object.hasOwnProperty("childShapeID")) {
-        editor.deselect();
+    if (!mouseCanSelectObject || intersects.length == 0 || !intersects[0].object.hasOwnProperty("childShapeID"))
         return;
-    }
     editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
 }
 

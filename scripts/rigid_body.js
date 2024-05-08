@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import { editor } from "editor";
-import { readFloatFromData } from "utils";
+import { readFloatFromData, writeFloatToData } from "utils";
 
 export class RigidBody {
     constructor(data) {
@@ -53,7 +53,7 @@ export class RigidBody {
 
         // TODO save rotation data
 
-        const statement = db.prepare("UPDATE RigidBody SET data = ? WHERE id = ?;");
+        const statement = editor.db.prepare("UPDATE RigidBody SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
     }
 
