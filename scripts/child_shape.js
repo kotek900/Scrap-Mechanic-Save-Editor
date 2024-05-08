@@ -47,13 +47,13 @@ export class ChildShape {
         editor.rigidBodies[this.bodyID].group.remove(this.mesh);
         editor.rigidBodies[this.bodyID].removeChildShape(this.id);
         this.mesh.remove();
-        const statement = db.prepare("DELETE FROM ChildShape WHERE id = ?;");
+        const statement = editor.db.prepare("DELETE FROM ChildShape WHERE id = ?;");
         statement.run([this.id]);
     }
 
     createMesh() {
         if (this.mesh != undefined) {
-            this.rigidBodies[this.bodyID].group.remove(this.mesh);
+            editor.rigidBodies[this.bodyID].group.remove(this.mesh);
             this.mesh.remove();
         }
 

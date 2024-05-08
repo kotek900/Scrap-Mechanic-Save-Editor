@@ -42,7 +42,7 @@ export class RigidBody {
             editor.childShapes[id].delete();
             this.childShapes.pop();
         }
-        const statement = db.prepare("DELETE FROM RigidBody WHERE id = ?;");
+        const statement = editor.db.prepare("DELETE FROM RigidBody WHERE id = ?;");
         statement.run([this.id]);
     }
 
