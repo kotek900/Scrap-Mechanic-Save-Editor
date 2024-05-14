@@ -82,9 +82,21 @@
             </div>
         </div>
         <script type="importmap">
-            { "imports": { "three": "https://unpkg.com/three@0.157.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/" } }
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/",
+
+                    "child_shape": "./scripts/child_shape.js",
+                    "editor": "./scripts/editor.js",
+                    "game_info": "./scripts/game_info.js",
+                    "resource_manager": "./scripts/resource_manager.js",
+                    "rigid_body": "./scripts/rigid_body.js",
+                    "utils": "./scripts/utils.js"
+                }
+            }
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
-        <script src="main.js" type="module"></script>
+        <script src="scripts/main.js" type="module"></script>
     </body>
 </html>
