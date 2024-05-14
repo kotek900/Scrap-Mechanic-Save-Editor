@@ -19,12 +19,12 @@ export function readInt16FromData(data, location) {
 }
 
 export function readUUID(data, location) {
-    let UUID = "";
+    let uuid = "";
     for (let i = 0; i < 16; i++) {
-        UUID += data[location-i].toString(16).padStart(2, '0');
+        uuid += data[location-i].toString(16).padStart(2, '0');
         if (i === 3 || i === 5 || i === 7 || i === 9) {
-            UUID += "-";
+            uuid += "-";
         }
     }
-    return UUID;
+    return uuid;
 }

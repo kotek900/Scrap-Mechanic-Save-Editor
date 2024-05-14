@@ -89,10 +89,10 @@ function copyElement(event) {
     }
 }
 
-function checkInvalidUUID(UUID) {
+function checkInvalidUUID(uuid) {
     //regex for UUID
     let regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-    return (UUID.match(regex)==null);
+    return (uuid.match(regex)==null);
 }
 
 window.addEventListener('resize', function() {
@@ -134,7 +134,7 @@ window.addEventListener("paste", function(event) {
         const childShapeID = createChildShape(PartType.BLOCK, bodyID);
         editor.childShapes[childShapeID].color = parseInt(childData.color.slice(1), 16)
         editor.childShapes[childShapeID].position = childData.pos
-        editor.childShapes[childShapeID].UUID = childData.shapeId
+        editor.childShapes[childShapeID].uuid = childData.shapeId
         editor.childShapes[childShapeID].size = childData.bounds
 
         editor.childShapes[childShapeID].createMesh();
