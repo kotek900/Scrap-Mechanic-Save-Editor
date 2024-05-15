@@ -123,4 +123,13 @@ export class GameInfo {
         statement.run([modData]);
         this.mods = modData;
     }
+
+    delete() {
+        // clear the mods table
+
+        const tableMods = document.getElementById("table_mods");
+        for (let i = 0; i < this.modList.length; i++) {
+            table_mods.rows[1].remove();
+        }
+    }
 }
