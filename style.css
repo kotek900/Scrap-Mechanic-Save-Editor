@@ -1,5 +1,9 @@
 :root {
-    --dark-bg: #2d2d30
+    --dark-bg: #2d2d30;
+    --bright-bg: #3a393e;
+
+    --bright-blue: #165d81;
+    --dark-blue: #12394d;
 }
 
 body {
@@ -8,7 +12,7 @@ body {
 }
 
 .input_box {
-    background-color: #3a393e;
+    background-color: var(--bright-bg);
     margin: 5px;
     padding: 5px;
     box-shadow: 1px 1px 4px black;
@@ -24,7 +28,7 @@ body {
 }
 
 #top_bar {
-    background-color: #1aa3e8;
+    background-color: var(--bright-blue);
     color: black;
     width: 100%;
     padding: 10px;
@@ -37,7 +41,7 @@ body {
 #top_bar div {
     float: left;
     margin: 5px;
-    background: #106590;
+    background: var(--dark-blue);
     color: white;
     height: calc(100% - 10px);
     padding: 5px;
@@ -48,6 +52,25 @@ body {
 
 #top_bar button {
     height: 100%;
+}
+
+#top_bar button[aria-selected] {
+    border: 2px solid black;
+    color: white;
+    border-radius: 5px;
+}
+
+#top_bar button[aria-selected="false"] {
+    background-color: var(--bright-bg);
+    box-shadow: inset 2px 2px 2px gray;
+}
+
+#top_bar button[aria-selected="false"]:hover {
+    filter: brightness(85%);
+}
+
+#top_bar button[aria-selected="true"] {
+    background-color: var(--dark-bg);
 }
 
 #open_file_button {
