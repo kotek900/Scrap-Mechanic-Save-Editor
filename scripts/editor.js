@@ -43,7 +43,7 @@ class Editor {
     afterSaveLoad(reader) {
         this.prepareScene();
         if(this.db)
-            this.db.free();
+            this.db.close();
         this.rigidBodies.length = 0;
         this.childShapes.length = 0;
 
