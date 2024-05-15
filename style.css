@@ -11,7 +11,20 @@ body {
     background-color: var(--dark-bg);
 }
 
-.input_box {
+mark {
+    color: red;
+    background-color: inherit;
+}
+
+#about_view {
+    color: white;
+}
+
+#about_view div a {
+    filter: brightness(150%);
+}
+
+.input_box, #about_view div {
     background-color: var(--bright-bg);
     margin: 5px;
     padding: 5px;
@@ -97,7 +110,7 @@ body {
     overflow: scroll;
 }
 
-#game_info_view {
+#game_info_view, #about_view {
     background-color: var(--dark-bg);
     color: white;
     margin: 0 auto;

@@ -12,6 +12,7 @@
             <div role="tablist">
                 <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
                 <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
+                <button role="tab" aria-selected="false" aria-controls="about_view" id="about_view_tab">About</button>
             </div>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
         </div>
@@ -81,6 +82,27 @@
                         <br>z: <input type="number" id="input_rotation_z_float"></input>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div id="about_view" role="tabpanel" hidden>
+            <div>
+                <h1>About</h1>
+                <h2>Working on files</h2>
+                <p>Open a Scrap Mechanic save file (.db) with the button on the top left.</p>
+                <p>To save the file, click the "save" button on the right to download it.</p>
+                <h2>Game Info</h2>
+                <p>The Game Info tab contains information about the save file.</p>
+                <p>You can change the seed, tick and the version of the save file.</p>
+                <p>Changing the version of the save file only changes the metadata, changing the save version value is <mark>not</mark> recommended.</p>
+                <h2>3D view</h2>
+                <p>In the 3D view tab you can see the Scrap Mechanic world in a 3D environment.</p>
+                <p>Rotate the camera with left click and move it around with right click.</p>
+                <p>Select objects with left click without dragging the mouse.</p>
+                <p>On the right you can see the propeties of the selected object, you can change the color, position, UUID and size of blocks. It's also possible to select the rigid body of blocks and delete objects. To create new blocks you need to select the rigid body and then click the create block button.</p>
+            </div>
+            <div>
+                <h2>Links:</h2>
+                <a href="https://github.com/kotek900/Scrap-Mechanic-Save-Editor">GitHub</a>
             </div>
         </div>
         <script src="scripts/tabs.js"></script>
