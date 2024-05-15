@@ -1,5 +1,10 @@
+:root {
+    --dark-bg: #2d2d30
+}
+
 body {
     margin: 0px;
+    background-color: var(--dark-bg);
 }
 
 .input_box {
@@ -58,7 +63,7 @@ body {
 #main_view { }
 
 #tool_menu {
-    background-color: #2d2d30;
+    background-color: var(--dark-bg);
     color: white;
     width: 30%;
     height: calc(100vh - 80px);
@@ -67,6 +72,14 @@ body {
     padding: 5px;
     overflow: scroll;
 }
+
+#game_info_view {
+    background-color: var(--dark-bg);
+    color: white;
+    margin: 0 auto;
+    padding: 5px;
+}
+
 
 #table_mods {
     border-collapse: collapse;

@@ -5,17 +5,21 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <div id="top_bar">
+        <div id="top_bar" role="tablist">
             <div id="file_controls">
                 <input type="file" id="open_file_button" accept=".db"></input>
             </div>
-            <div id="info_gameversion">Save Version: </div>
-            <div id="info_seed">Seed: </div>
-            <div id="info_gametick">Tick: </div>
+            <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
+            <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
             <button id="button_select_game_info">Select Game Info</button>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
         </div>
-        <div id="main_view">
+        <div id="game_info_view" role="tabpanel">
+            <div id="info_gameversion">Save Version: </div>
+            <div id="info_seed">Seed: </div>
+            <div id="info_gametick">Tick: </div>
+        </div>
+        <div id="main_view" role="tabpanel">
             <div id="tool_menu">
                 <div class="input_box" id="info_selected_text">Selected: <span id="info_selected">none</span></div>
                 <div class="input_box" id="input_box_buttons">
@@ -81,6 +85,7 @@
                 </div>
             </div>
         </div>
+        <script src="scripts/tabs.js"></script>
         <script type="importmap">
             {
                 "imports": {
