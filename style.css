@@ -34,6 +34,7 @@ mark {
 
 .input_box button {
     height: 35px;
+    cursor: pointer;
 }
 
 #input_box_buttons {
@@ -64,6 +65,7 @@ mark {
 
 #top_bar button {
     height: 100%;
+    cursor: pointer;
 }
 
 #top_bar button[aria-selected] {
@@ -89,6 +91,7 @@ mark {
 
 #open_file_button {
     font-size: 20px;
+    cursor: pointer;
 }
 
 #save_file_button {
