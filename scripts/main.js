@@ -156,10 +156,6 @@ save_file_button.addEventListener('mouseenter', function(evt) {
     save_file_link.href = url;
 });
 
-button_select_game_info.addEventListener('click', function(evt) {
-    editor.select(SelectionType.GAME_INFO, -1);
-});
-
 button_delete.addEventListener('click', deleteSelected);
 
 button_select_body.addEventListener('click', function(evt) {
@@ -368,13 +364,6 @@ open_file_button.onchange = () => {
     const r = new FileReader();
     r.onload = function() {
         editor.afterSaveLoad(r);
-
-        const infoGameVersion = document.getElementById("info_gameversion");
-        const infoSeed = document.getElementById("info_seed");
-        const infoGameTick = document.getElementById("info_gametick");
-        infoGameVersion.textContent = "Version: " + editor.gameVersion;
-        infoSeed.textContent = "Seed: " + editor.seed;
-        infoGameTick.textContent = "Tick: " + editor.gameTick;
 
         editor.deselect();
     }

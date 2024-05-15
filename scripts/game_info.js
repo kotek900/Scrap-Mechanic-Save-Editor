@@ -28,6 +28,15 @@ export class GameInfo {
             };
             this.addModToTable(this.modList[i], i);
         }
+
+        const inputSeed = document.getElementById("input_seed");
+        inputSeed.value = this.seed;
+
+        const inputTick = document.getElementById("input_tick");
+        inputTick.value = this.gameTick;
+
+        const inputVersion = document.getElementById("input_version");
+        inputVersion.value = this.saveGameVersion;
     }
 
     addMod(fileId, localId) {

@@ -113,19 +113,9 @@ class Editor {
         const infoSelected = document.getElementById("info_selected");
         switch(type) {
         case SelectionType.GAME_INFO:
-            const gameInfoMenu = document.getElementById("GameInfo_menu");
-            gameInfoMenu.style.display = "block";
+            console.warn("GAME_INFO is no longer a valid selection type");
 
             infoSelected.textContent = "Game Info";
-
-            const inputSeed = document.getElementById("input_seed");
-            inputSeed.value = this.gameInfo.seed;
-
-            const inputTick = document.getElementById("input_tick");
-            inputTick.value = this.gameInfo.gameTick;
-
-            const inputVersion = document.getElementById("input_version");
-            inputVersion.value = this.gameInfo.saveGameVersion;
             break;
         case SelectionType.CHILD_SHAPE:
             const childShapeMenu = document.getElementById("ChildShape_menu");
@@ -205,9 +195,6 @@ class Editor {
     deselect() {
         const infoSelected = document.getElementById("info_selected");
         infoSelected.textContent = "none";
-
-        const gameInfoMenu = document.getElementById("GameInfo_menu");
-        gameInfoMenu.style.display = "none";
 
         const childShapeMenu = document.getElementById("ChildShape_menu");
         childShapeMenu.style.display = "none";

@@ -11,47 +11,43 @@
             </div>
             <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
             <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
-            <button id="button_select_game_info">Select Game Info</button>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
         </div>
         <div id="game_info_view" role="tabpanel">
-            <div id="info_gameversion">Save Version: </div>
-            <div id="info_seed">Seed: </div>
-            <div id="info_gametick">Tick: </div>
+            <div id="GameInfo_menu">
+                <div class="input_box">
+                    <table>
+                        <tr>
+                            <th>Seed:</th><th><input id="input_seed" type="number"></th>
+                        </tr>
+                        <tr>
+                            <th>Tick:</th><th><input id="input_tick" type="number"></th>
+                        </tr>
+                        <tr>
+                            <th>Version:</th><th><input id="input_version" type="number"></th>
+                        </tr>
+                    </table>
+                </div>
+                <div class="input_box">
+                    Mods: <span id="info_mods"></span>
+                    <table id="table_mods">
+                        <tr>
+                            <td>fileId</td><td>localId</td><td></td>
+                        </tr>
+                        <tr>
+                            <td><input id="input_mod_fileId" type="number" size="10"></input></td><td><input id="input_mod_localId" size="36" maxlength="36"></input></td><td><button id="button_add_mod">add</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div id="main_view" role="tabpanel">
+        <div id="main_view" role="tabpanel" hidden>
             <div id="tool_menu">
                 <div class="input_box" id="info_selected_text">Selected: <span id="info_selected">none</span></div>
                 <div class="input_box" id="input_box_buttons">
                     <button id="button_select_body">Select rigid body</button>
                     <button id="button_create_block">Create block</button>
                     <button id="button_delete">delete object</button>
-                </div>
-                <div id="GameInfo_menu">
-                    <div class="input_box">
-                        <table>
-                            <tr>
-                                <th>Seed:</th><th><input id="input_seed" type="number"></th>
-                            </tr>
-                            <tr>
-                                <th>Tick:</th><th><input id="input_tick" type="number"></th>
-                            </tr>
-                            <tr>
-                                <th>Version:</th><th><input id="input_version" type="number"></th>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="input_box">
-                        Mods: <span id="info_mods"></span>
-                        <table id="table_mods">
-                            <tr>
-                                <td>fileId</td><td>localId</td><td></td>
-                            </tr>
-                            <tr>
-                                <td><input id="input_mod_fileId" type="number" size="10"></input></td><td><input id="input_mod_localId" size="36" maxlength="36"></input></td><td><button id="button_add_mod">add</button></td>
-                            </tr>
-                        </table>
-                    </div>
                 </div>
                 <div id="ChildShape_menu">
                     <div class="input_box">UUID: <input type="text" id="selected_UUID" size="36" maxlength="36"></input></div>
