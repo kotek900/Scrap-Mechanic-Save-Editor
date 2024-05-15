@@ -76,6 +76,7 @@ export class GameInfo {
             currentRow.remove();
             const infoMods = document.getElementById("info_mods");
             infoMods.textContent = this.modList.length;
+            this.updateDatabase();
         });
 
         buttonRemoveCell.appendChild(buttonElement);

@@ -46,7 +46,6 @@ body {
     height: calc(100% - 10px);
     padding: 5px;
     border-radius: 2px;
-    width: 300px;
     margin-top: 0px;
 }
 
@@ -55,14 +54,16 @@ body {
 }
 
 #top_bar button[aria-selected] {
-    border: 2px solid black;
+    border: thin solid black;
     color: white;
-    border-radius: 5px;
+    border-radius: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 20px;
 }
 
 #top_bar button[aria-selected="false"] {
     background-color: var(--bright-bg);
-    box-shadow: inset 2px 2px 2px gray;
 }
 
 #top_bar button[aria-selected="false"]:hover {

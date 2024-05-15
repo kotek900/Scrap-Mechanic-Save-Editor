@@ -5,12 +5,14 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <div id="top_bar" role="tablist">
+        <div id="top_bar">
             <div id="file_controls">
                 <input type="file" id="open_file_button" accept=".db"></input>
             </div>
-            <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
-            <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
+            <div role="tablist">
+                <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
+                <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
+            </div>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
         </div>
         <div id="game_info_view" role="tabpanel">

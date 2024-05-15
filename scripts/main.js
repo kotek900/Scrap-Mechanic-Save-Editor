@@ -172,13 +172,12 @@ button_create_block.addEventListener('click', function(evt) {
 });
 
 button_add_mod.addEventListener('click', function(evt) {
-    if (editor.selected.type!=SelectionType.GAME_INFO)
-        return;
     const inputModLocalID = document.getElementById("input_mod_localId");
     if (checkInvalidUUID(inputModLocalID.value))
         return;
     const inputModFileID = document.getElementById("input_mod_fileId");
     editor.gameInfo.addMod(inputModFileID.value, inputModLocalID.value);
+    editor.gameInfo.updateDatabase();
 });
 
 selected_UUID.addEventListener('input', function(evt) {
@@ -188,26 +187,20 @@ selected_UUID.addEventListener('input', function(evt) {
 });
 
 input_seed.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.GAME_INFO)
-        return;
     editor.gameInfo.seed = input_seed.value;
-    info_seed.textContent = "Seed: " + editor.gameInfo.seed;
+    editor.gameInfo.updateDatabase();
 });
 
 input_tick.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.GAME_INFO)
-        return;
     editor.gameInfo.gameTick = input_tick.value;
     const infoGameTick = document.getElementById("info_gametick");
-    infoGameTick.textContent = "Tick: " + editor.gameInfo.gameTick;
+    editor.gameInfo.updateDatabase();
 });
 
 input_version.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.GAME_INFO)
-        return;
     editor.gameInfo.saveGameVersion = input_version.value;
     const infoGameVersion = document.getElementById("info_gameversion");
-    infoGameVersion.textContent = "Version: " + editor.gameInfo.saveGameVersion;
+    editor.gameInfo.updateDatabase();
 });
 
 selected_color_picker.addEventListener('input', function(evt) {
