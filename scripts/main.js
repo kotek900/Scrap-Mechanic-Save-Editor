@@ -71,6 +71,33 @@ function deleteSelected() {
     }
 }
 
+function objectToJson(object, type) {
+    switch(type) {
+    case SelectionType.CHILD_SHAPE:
+        let child = {};
+        child.color = "#"+object.color.toString(16);
+        child.pos = object.position;
+        child.shapeId = object.uuid;
+        if (object.type==PartType.BLOCK)
+            child.bounds = object.size;
+
+        return child;
+    case SelectionType.RIGID_BODY:
+        let childs = [];
+        let body = {};
+        for (let i = 0; i < object.childShapes.length; i++) {
+            let childShape = editor.childShapes[object.childShapes[i]];
+
+            childs[i] = objectToJson(childShape, SelectionType.CHILD_SHAPE);
+
+            body = {childs: childs};
+        }
+
+        return body;
+    }
+    console.error("invalid object type: "+type);
+}
+
 function copyElement(event) {
     switch(editor.selected.type) {
     case SelectionType.CHILD_SHAPE:
@@ -78,39 +105,22 @@ function copyElement(event) {
 
         for (let i = 0; i < editor.selected.objectID.length; i++) {
             const childShape = editor.childShapes[editor.selected.objectID[i]];
-            childs[i] = {};
-            childs[i].color = "#"+childShape.color.toString(16);
-            childs[i].pos = childShape.position;
-            childs[i].shapeId = childShape.uuid;
-            if (childShape.type==PartType.BLOCK)
-                childs[i].bounds = childShape.size;
+            childs[i] = objectToJson(childShape, SelectionType.CHILD_SHAPE);
         }
 
         event.clipboardData.setData("text/plain", JSON.stringify({childs: childs}));
         event.preventDefault();
+        break;
     case SelectionType.RIGID_BODY:
         let bodies = [];
 
         for (let i = 0; i < editor.selected.objectID.length; i++) {
-            bodies[i] = {};
-            let childs = [];
-            let body = editor.rigidBodies[editor.selected.objectID[i]];
-            for (let j = 0; j < body.childShapes.length; j++) {
-                let childShape = editor.childShapes[body.childShapes[j]];
-
-                childs[i] = {};
-                childs[i].color = "#"+childShape.color.toString(16);
-                childs[i].pos = childShape.position;
-                childs[i].shapeId = childShape.uuid;
-                if (childShape.type==PartType.BLOCK)
-                    childs[i].bounds = childShape.size;
-
-                bodies[i] = {childs: childs};
-            }
+            bodies[i] = objectToJson(editor.rigidBodies[editor.selected.objectID[i]], SelectionType.RIGID_BODY);
         }
 
-        event.clipboardData.setData("text/plain", JSON.stringify({bodies: bodies}));
+        event.clipboardData.setData("text/plain", JSON.stringify({bodies: bodies, version: 4}));
         event.preventDefault();
+        break;
     }
 }
 
