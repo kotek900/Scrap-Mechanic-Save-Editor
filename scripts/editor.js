@@ -102,10 +102,10 @@ class Editor {
             this.gameInfo.updateDatabase();
             break;
         case SelectionType.CHILD_SHAPE:
-            this.childShapes[this.selected.objectID].updateDatabase();
+            for (let i=0; i < this.selected.objectID.length; i++) this.childShapes[this.selected.objectID[i]].updateDatabase();
             break;
         case SelectionType.RIGID_BODY:
-            this.rigidBodies[this.selected.objectID].updateDatabase();
+            for (let i=0; i < this.selected.objectID.length; i++) this.rigidBodies[this.selected.objectID[i]].updateDatabase();
         case SelectionType.NONE:
             break;
         default:
@@ -230,8 +230,11 @@ class Editor {
 
         this.updateSelectedDatabase();
 
-        if (this.selected.type==SelectionType.CHILD_SHAPE && this.childShapes[this.selected.objectID].type==PartType.BLOCK) {
-            this.childShapes[this.selected.objectID].mesh.material.color = new THREE.Color(this.childShapes[this.selected.objectID].color);
+        if (this.selected.type==SelectionType.CHILD_SHAPE) {
+            for (let i=0; i < editor.selected.objectID.length; i++) {
+                if (this.childShapes[this.selected.objectID[i]].type!=PartType.BLOCK) continue;
+                this.childShapes[this.selected.objectID[i]].mesh.material.color = new THREE.Color(this.childShapes[this.selected.objectID[i]].color);
+            }
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);
