@@ -160,7 +160,7 @@ window.addEventListener("paste", function(event) {
         let childData;
         try {
             const selectionString = event.clipboardData.getData("text");
-            bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? editor.childShapes[editor.selected.objectID].bodyID : editor.selected.objectID;
+            bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? mainSelection.bodyID : mainSelection.id;
             childData = JSON.parse(selectionString).childs;
         } catch (e) {
             return;
