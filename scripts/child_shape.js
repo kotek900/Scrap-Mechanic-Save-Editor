@@ -10,6 +10,10 @@ export const PartType = {
     PART: 0x20
 };
 
+let blockTexture = new THREE.TextureLoader().load( "blockTexture.png" );
+blockTexture.wrapS = THREE.RepeatWrapping;
+blockTexture.wrapT = THREE.RepeatWrapping;
+
 export class ChildShape {
     constructor(data) {
         this.id = data[0];
@@ -57,14 +61,30 @@ export class ChildShape {
             this.mesh.remove();
         }
 
-        const material = new THREE.MeshLambertMaterial({
-            color: this.color
-        });
-
         switch(this.type) {
         case PartType.BLOCK:
+
+
+            const material = new THREE.MeshLambertMaterial({
+                color: this.color,
+                map: blockTexture
+            });
+
             const geometry = new THREE.BoxGeometry(this.size.z, this.size.x, this.size.y);
+            let pos = geometry.getAttribute( 'position' )
+            let uv = geometry.getAttribute( 'uv' );
+            for( let i=0; i<pos.count; i++ ) {
+                let x = (this.size.z-1)/2 + (pos.getX(i)+0.5),
+                    y = (this.size.x-1)/2 + (pos.getY(i)+0.5),
+                    z = (this.size.y-1)/2 + (pos.getZ(i)+0.5);
+
+                if( i<8 ) uv.setXY( i, z, y );
+                else if( i<16 ) uv.setXY( i, x, z );
+                else uv.setXY( i, y, x );
+            }
+
             this.mesh = new THREE.Mesh(geometry, material);
+
             break;
         case PartType.PART:
             this.mesh = resourceManager.unknownModel.scene.clone();
