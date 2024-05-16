@@ -74,15 +74,17 @@ function deleteSelected() {
 
 function copyElement(event) {
     if(editor.selected.type==SelectionType.CHILD_SHAPE) {
-        const childs = [];
+        let childs = [];
 
-        const childShape = editor.childShapes[editor.selected.objectID];
-        childs[0] = {};
-        childs[0].color = "#"+childShape.color.toString(16);
-        childs[0].pos = childShape.position;
-        childs[0].shapeId = childShape.uuid;
-        if (childShape.type==PartType.BLOCK)
-            childs[0].bounds = childShape.size;
+        for (let i = 0; i < editor.selected.objectID.length; i++) {
+            const childShape = editor.childShapes[editor.selected.objectID[i]];
+            childs[i] = {};
+            childs[i].color = "#"+childShape.color.toString(16);
+            childs[i].pos = childShape.position;
+            childs[i].shapeId = childShape.uuid;
+            if (childShape.type==PartType.BLOCK)
+                childs[i].bounds = childShape.size;
+        }
 
         event.clipboardData.setData("text/plain", JSON.stringify({childs: childs}));
         event.preventDefault();
