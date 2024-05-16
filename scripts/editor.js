@@ -16,19 +16,37 @@ export const SelectionType = {
     RIGID_BODY: 3
 };
 
+export let mainSelection;
+
+function getObjectByID(type, objectID) {
+    switch(type) {
+    case SelectionType.CHILD_SHAPE:
+        return editor.childShapes[objectID];
+    case SelectionType.RIGID_BODY:
+        return editor.rigidBodies[objectID];
+    case SelectionType.NONE:
+        return;
+    }
+    console.error("invalid type: " + type);
+}
+
+
 class Selection {
     constructor(type, objectID) {
         this.type = type;
         this.objectID = [objectID];
+        mainSelection = getObjectByID(type, objectID);
     }
 
     select(objectID) {
-        this.objectID.push(objectID);
+        mainSelection = getObjectByID(this.type, objectID);
+        if (this.objectID.includes(objectID)) return;
+        this.objectID.unshift(objectID);
     }
 
     toggleSelect(objectID) {
         if (this.objectID.includes(objectID)) this.deselect(objectID);
-        else this.select(objectID);
+        else editor.select(this.type, objectID, true);
     }
 
     deselect(objectID) {
@@ -45,6 +63,12 @@ class Selection {
         if (this.objectID.length == 0) {
             // clear the selection
             editor.deselect();
+            return;
+        }
+
+        // reset the selection
+        if (mainSelection.id == objectID) {
+            editor.select(this.type, this.objectID[0], true);
         }
     }
 }

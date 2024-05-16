@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { ChildShape, PartType } from "child_shape";
-import { editor, SelectionType } from "editor";
+import { editor, SelectionType, mainSelection } from "editor";
 
 // Functions
 
@@ -160,7 +160,7 @@ button_delete.addEventListener('click', deleteSelected);
 
 button_select_body.addEventListener('click', function(evt) {
     if(editor.selected.type==SelectionType.CHILD_SHAPE) {
-        let bodyID = editor.childShapes[editor.selected.objectID].bodyID;
+        let bodyID = mainSelection.bodyID;
         editor.select(SelectionType.RIGID_BODY, bodyID);
     }
 });
@@ -183,7 +183,7 @@ button_add_mod.addEventListener('click', function(evt) {
 selected_UUID.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE || checkInvalidUUID(selected_UUID.value))
         return;
-    editor.childShapes[editor.selected.objectID].uuid = selected_UUID.value;
+    mainSelection.uuid = selected_UUID.value;
 });
 
 input_seed.addEventListener('input', function(evt) {
@@ -206,50 +206,50 @@ input_version.addEventListener('input', function(evt) {
 selected_color_picker.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].color = parseInt(selected_color_picker.value.slice(1), 16);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.color = parseInt(selected_color_picker.value.slice(1), 16);
+    mainSelection.createMesh();
 });
 
 input_position_x.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.x = Math.floor(input_position_x.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.x = Math.floor(input_position_x.value);
+    mainSelection.createMesh();
 });
 
 input_position_y.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.y = Math.floor(input_position_y.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.y = Math.floor(input_position_y.value);
+    mainSelection.createMesh();
 });
 
 input_position_z.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.z = Math.floor(input_position_z.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.z = Math.floor(input_position_z.value);
+    mainSelection.createMesh();
 });
 
 input_size_x.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.x = Math.floor(input_size_x.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.x = Math.floor(input_size_x.value);
+    mainSelection.createMesh();
 });
 
 input_size_y.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.y = Math.floor(input_size_y.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.y = Math.floor(input_size_y.value);
+    mainSelection.createMesh();
 });
 
 input_size_z.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.z = Math.floor(input_size_z.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.z = Math.floor(input_size_z.value);
+    mainSelection.createMesh();
 });
 
 input_position_x_float.addEventListener('input', function(evt) {
