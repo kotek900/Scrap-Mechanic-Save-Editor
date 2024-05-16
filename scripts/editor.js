@@ -19,7 +19,22 @@ export const SelectionType = {
 class Selection {
     constructor(type, objectID) {
         this.type = type;
-        this.objectID = objectID;
+        this.objectID = [objectID];
+    }
+
+    select(objectID) {
+        this.objectID.push(objectID);
+    }
+
+    deselect(objectID) {
+        this.objectID = this.objectID.filter(function (id) {
+            return id != objectID;
+        });
+
+        if (this.objectID.length == 0) {
+            // clear the selection
+            deselect();
+        }
     }
 }
 
@@ -100,10 +115,12 @@ class Editor {
         }
     }
 
-    select(type, objectID) {
-        this.deselect();
+    select(type, objectID, keepSelection) {
+        if (this.selected.type!=type) keepSelection = false;
+        if (keepSelection!=true) this.deselect();
 
-        this.selected = new Selection(type, objectID);
+        if (keepSelection) this.selected.select(objectID);
+        else this.selected = new Selection(type, objectID);
 
         if(type!=SelectionType.NONE && type!=SelectionType.GAME_INFO) {
             const inputBoxButtons = document.getElementById("input_box_buttons");
