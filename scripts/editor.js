@@ -26,16 +26,31 @@ class Selection {
         this.objectID.push(objectID);
     }
 
+    toggleSelect(objectID) {
+        if (this.objectID.includes(objectID)) this.deselect(objectID);
+        else this.select(objectID);
+    }
+
     deselect(objectID) {
+        if (this.type == SelectionType.CHILD_SHAPE &&
+            this.objectID.includes(objectID) &&
+            editor.childShapes[objectID].type==PartType.BLOCK) {
+                resetColor(editor.childShapes[objectID]);
+        }
+
         this.objectID = this.objectID.filter(function (id) {
             return id != objectID;
         });
 
         if (this.objectID.length == 0) {
             // clear the selection
-            deselect();
+            editor.deselect();
         }
     }
+}
+
+function resetColor(block) {
+    block.mesh.material.color = new THREE.Color(block.color);
 }
 
 class Editor {
@@ -113,6 +128,11 @@ class Editor {
             console.assert(false);
             break;
         }
+    }
+
+    toggleSelect(type, objectID) {
+        if (this.selected.type == type) this.selected.toggleSelect(objectID);
+        else this.select(type, objectID);
     }
 
     select(type, objectID, keepSelection) {
@@ -233,7 +253,7 @@ class Editor {
         if (this.selected.type==SelectionType.CHILD_SHAPE) {
             for (let i=0; i < editor.selected.objectID.length; i++) {
                 if (this.childShapes[this.selected.objectID[i]].type!=PartType.BLOCK) continue;
-                this.childShapes[this.selected.objectID[i]].mesh.material.color = new THREE.Color(this.childShapes[this.selected.objectID[i]].color);
+                resetColor(this.childShapes[this.selected.objectID[i]]);
             }
         }
 

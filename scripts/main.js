@@ -351,8 +351,9 @@ main_view.children[1].onclick = function() {
     const intersects = raycaster.intersectObjects(editor.scene.children);
     if (!mouseCanSelectObject || intersects.length == 0 || !intersects[0].object.hasOwnProperty("childShapeID"))
         return;
-    let keepSelection = window.event.shiftKey;
-    editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID, keepSelection);
+
+    if (window.event.shiftKey) editor.toggleSelect(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
+    else editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
 }
 
 animate();
