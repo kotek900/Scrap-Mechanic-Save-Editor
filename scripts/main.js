@@ -158,11 +158,20 @@ window.addEventListener("paste", function(event) {
         event.preventDefault();
         let bodyID = 0;
         let childData;
+        let bodyData;
+        let data;
         try {
             const selectionString = event.clipboardData.getData("text");
             bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? mainSelection.bodyID : mainSelection.id;
-            childData = JSON.parse(selectionString).childs;
+            data = JSON.parse(selectionString);
+            childData = data.childs;
+            bodyData = data.bodies;
         } catch (e) {
+            return;
+        }
+
+        if (bodyData) {
+            console.warn("pasting rigid bodies is unsupported!");
             return;
         }
 
