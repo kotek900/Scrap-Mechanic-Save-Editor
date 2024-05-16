@@ -302,9 +302,9 @@ function animate() {
 
     if (editor.selected.type==SelectionType.CHILD_SHAPE) {
         const time = new Date();
-        const selectionColor = new THREE.Color("white");
-        selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
         for (let i=0; i < editor.selected.objectID.length; i++) {
+            const selectionColor = new THREE.Color("white");
+            selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
             let childShape = editor.childShapes[editor.selected.objectID[i]];
             if (childShape.type!=PartType.BLOCK) continue;
             selectionColor.lerp(new THREE.Color(childShape.color), 0.2);
