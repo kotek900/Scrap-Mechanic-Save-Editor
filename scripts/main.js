@@ -137,7 +137,7 @@ window.addEventListener('resize', function() {
 });
 
 window.addEventListener("cut", function(event) {
-    if (document.activeElement!=document.body)
+    if (document.activeElement!=canvas)
         return;
     copyElement(event);
     if (editor.selected.type==SelectionType.CHILD_SHAPE)
@@ -145,13 +145,13 @@ window.addEventListener("cut", function(event) {
 });
 
 window.addEventListener("copy", function(event) {
-    if (document.activeElement!=document.body)
+    if (document.activeElement!=canvas)
         return;
     copyElement(event);
 });
 
 window.addEventListener("paste", function(event) {
-    if(document.activeElement!=document.body)
+    if(document.activeElement!=canvas)
         return;
 
     if(editor.selected.type==SelectionType.CHILD_SHAPE || editor.selected.type==SelectionType.RIGID_BODY) {
@@ -371,6 +371,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
 
 const canvas = main_view.appendChild(renderer.domElement);
+canvas.setAttribute("tabindex", "0");
 
 const controls = new OrbitControls(camera, canvas);
 
