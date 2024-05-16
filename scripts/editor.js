@@ -118,6 +118,8 @@ class Editor {
         for (let i = 0; i < childShapeData.length; i++) {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
         }
+
+        this.selected = new Selection(SelectionType.NONE, 0);
     }
 
     prepareScene() {
