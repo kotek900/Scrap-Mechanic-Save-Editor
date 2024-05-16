@@ -52,7 +52,6 @@ function createChildShape(type, rigidBodyID) {
     info[2] = data;
 
     editor.childShapes[childShapeID] = new ChildShape(info);
-    editor.select(SelectionType.CHILD_SHAPE, childShapeID);
 
     return childShapeID;
 }
@@ -128,20 +127,22 @@ window.addEventListener("paste", function(event) {
         try {
             const selectionString = event.clipboardData.getData("text");
             bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? editor.childShapes[editor.selected.objectID].bodyID : editor.selected.objectID;
-            childData = JSON.parse(selectionString).childs[0];
+            childData = JSON.parse(selectionString).childs;
         } catch (e) {
             return;
         }
 
-        const childShapeID = createChildShape(PartType.BLOCK, bodyID);
-        editor.childShapes[childShapeID].color = parseInt(childData.color.slice(1), 16)
-        editor.childShapes[childShapeID].position = childData.pos
-        editor.childShapes[childShapeID].uuid = childData.shapeId
-        editor.childShapes[childShapeID].size = childData.bounds
+        for (let i = 0; i < childData.length; i++) {
+            const childShapeID = createChildShape(PartType.BLOCK, bodyID);
+            editor.childShapes[childShapeID].color = parseInt(childData[i].color.slice(1), 16)
+            editor.childShapes[childShapeID].position = childData[i].pos
+            editor.childShapes[childShapeID].uuid = childData[i].shapeId
+            editor.childShapes[childShapeID].size = childData[i].bounds
 
-        editor.childShapes[childShapeID].createMesh();
+            editor.childShapes[childShapeID].createMesh();
 
-        editor.select(SelectionType.CHILD_SHAPE, childShapeID);
+            editor.select(SelectionType.CHILD_SHAPE, childShapeID, i!=0);
+        }
     }
 });
 
