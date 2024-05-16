@@ -168,7 +168,7 @@ button_select_body.addEventListener('click', function(evt) {
 button_create_block.addEventListener('click', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    createChildShape(SelectionType.BLOCK, editor.selected.objectID);
+    createChildShape(PartType.BLOCK, editor.selected.objectID);
 });
 
 button_add_mod.addEventListener('click', function(evt) {
