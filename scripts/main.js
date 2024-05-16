@@ -60,12 +60,12 @@ function deleteSelected() {
     const objectID = editor.selected.objectID;
     switch(editor.selected.type) {
     case SelectionType.CHILD_SHAPE:
+        for (let i = 0; i < objectID.length; i++) editor.childShapes[objectID[i]].delete();
         editor.deselect();
-        editor.childShapes[objectID].delete();
         break;
     case SelectionType.RIGID_BODY:
+        for (let i = 0; i < objectID.length; i++) editor.rigidBodies[objectID[i]].delete();
         editor.deselect();
-        editor.rigidBodies[objectID].delete();
     default:
         break;
     }
