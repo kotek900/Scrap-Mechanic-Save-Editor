@@ -72,7 +72,8 @@ function deleteSelected() {
 }
 
 function copyElement(event) {
-    if(editor.selected.type==SelectionType.CHILD_SHAPE) {
+    switch(editor.selected.type) {
+    case SelectionType.CHILD_SHAPE:
         let childs = [];
 
         for (let i = 0; i < editor.selected.objectID.length; i++) {
@@ -86,6 +87,29 @@ function copyElement(event) {
         }
 
         event.clipboardData.setData("text/plain", JSON.stringify({childs: childs}));
+        event.preventDefault();
+    case SelectionType.RIGID_BODY:
+        let bodies = [];
+
+        for (let i = 0; i < editor.selected.objectID.length; i++) {
+            bodies[i] = {};
+            let childs = [];
+            let body = editor.rigidBodies[editor.selected.objectID[i]];
+            for (let j = 0; j < body.childShapes.length; j++) {
+                let childShape = editor.childShapes[body.childShapes[j]];
+
+                childs[i] = {};
+                childs[i].color = "#"+childShape.color.toString(16);
+                childs[i].pos = childShape.position;
+                childs[i].shapeId = childShape.uuid;
+                if (childShape.type==PartType.BLOCK)
+                    childs[i].bounds = childShape.size;
+
+                bodies[i] = {childs: childs};
+            }
+        }
+
+        event.clipboardData.setData("text/plain", JSON.stringify({bodies: bodies}));
         event.preventDefault();
     }
 }
