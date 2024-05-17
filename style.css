@@ -20,17 +20,19 @@ mark {
     color: white;
 }
 
-#object_list details {
+#object_list details, #object_list details div {
     padding: 5px;
     margin: 2px;
     padding-left: 20px;
+    box-shadow: none;
+    border-radius: 3px;
 }
 
-#object_list details:nth-child(even) {
+#object_list details:nth-child(even), #object_list div:nth-child(even) {
     background-color: var(--bright-bg);
 }
 
-#object_list details:nth-child(odd) {
+#object_list details:nth-child(odd), #object_list div:nth-child(odd) {
     background-color: var(--dark-bg);
 }
 

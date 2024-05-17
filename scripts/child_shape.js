@@ -49,15 +49,31 @@ export class ChildShape {
 
         // add shape to the object list tab
 
-        let detailsElement = document.createElement("details");
-        let summaryElement = document.createElement("summary");
+        let containsDetails = false;
 
-        summaryElement.textContent = "Shape " + this.id;
+        if (containsDetails) {
 
-        detailsElement.appendChild(summaryElement);
-        editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
+            let detailsElement = document.createElement("details");
+            let summaryElement = document.createElement("summary");
 
-        this.objectListElement = detailsElement;
+            summaryElement.textContent = "Shape " + this.id;
+
+            detailsElement.appendChild(summaryElement);
+            editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
+
+            this.objectListElement = detailsElement;
+
+        } else {
+
+            let infoElement = document.createElement("div");
+
+            infoElement.textContent = "Shape " + this.id;
+
+            editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
+
+            this.objectListElement = infoElement;
+
+        }
     }
 
     delete() {
