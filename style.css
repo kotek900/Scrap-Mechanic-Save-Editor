@@ -24,7 +24,7 @@ mark {
     padding: 5px;
     margin: 2px;
     padding-left: 20px;
-    box-shadow: none;
+    box-shadow: inset 0px 0px 2px black;
     border-radius: 3px;
 }
 
