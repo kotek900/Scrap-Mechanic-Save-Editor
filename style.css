@@ -16,15 +16,15 @@ mark {
     background-color: inherit;
 }
 
-#about_view {
+.generic_tab {
     color: white;
 }
 
-#about_view div a {
+.generic_tab div a {
     filter: brightness(150%);
 }
 
-.input_box, #about_view div {
+.input_box, .generic_tab div {
     background-color: var(--bright-bg);
     margin: 5px;
     padding: 5px;
