@@ -12,6 +12,7 @@
             <div role="tablist">
                 <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
                 <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
+                <button role="tab" aria-selected="false" aria-controls="object_list_view" id="object_list_tab">Object list</button>
                 <button role="tab" aria-selected="false" aria-controls="about_view" id="about_view_tab">About</button>
             </div>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
@@ -84,7 +85,11 @@
                 </div>
             </div>
         </div>
-        <div id="about_view" role="tabpanel" hidden>
+        <div id="object_list_view" role="tabpanel" class="generic_tab" hidden>
+            <div id="object_list">
+            </div>
+        </div>
+        <div id="about_view" role="tabpanel" class="generic_tab" hidden>
             <div>
                 <h1>About</h1>
                 <h2>Working on files</h2>

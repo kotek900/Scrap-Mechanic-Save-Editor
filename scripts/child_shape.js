@@ -45,6 +45,35 @@ export class ChildShape {
         }
 
         this.createMesh();
+
+
+        // add shape to the object list tab
+
+        let containsDetails = false;
+
+        if (containsDetails) {
+
+            let detailsElement = document.createElement("details");
+            let summaryElement = document.createElement("summary");
+
+            summaryElement.textContent = "Shape " + this.id;
+
+            detailsElement.appendChild(summaryElement);
+            editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
+
+            this.objectListElement = detailsElement;
+
+        } else {
+
+            let infoElement = document.createElement("div");
+
+            infoElement.textContent = "Shape " + this.id;
+
+            editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
+
+            this.objectListElement = infoElement;
+
+        }
     }
 
     delete() {
@@ -53,6 +82,8 @@ export class ChildShape {
         this.mesh.remove();
         const statement = editor.db.prepare("DELETE FROM ChildShape WHERE id = ?;");
         statement.run([this.id]);
+
+        this.objectListElement.remove();
     }
 
     createMesh() {
