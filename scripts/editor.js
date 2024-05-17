@@ -18,6 +18,10 @@ export const SelectionType = {
 
 export let mainSelection;
 
+function changeMainSelection(type, objectID) {
+    mainSelection = getObjectByID(type, objectID);
+}
+
 function getObjectByID(type, objectID) {
     switch(type) {
     case SelectionType.CHILD_SHAPE:
@@ -35,11 +39,11 @@ class Selection {
     constructor(type, objectID) {
         this.type = type;
         this.objectID = [objectID];
-        mainSelection = getObjectByID(type, objectID);
+        changeMainSelection(type, objectID);
     }
 
     select(objectID) {
-        mainSelection = getObjectByID(this.type, objectID);
+        changeMainSelection(this.type, objectID);
         if (this.objectID.includes(objectID)) return;
         this.objectID.unshift(objectID);
     }
