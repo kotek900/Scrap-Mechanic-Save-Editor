@@ -26,6 +26,10 @@ mark {
     color: white;
 }
 
+#object_list {
+    font-family: Sans-Serif;
+}
+
 #object_list details .selected:nth-child(even), #object_list details div .selected:nth-child(even) {
     background-color: var(--selected-bright);
 }
