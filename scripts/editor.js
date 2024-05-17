@@ -63,6 +63,12 @@ class Selection {
     }
 
     deselect(objectID) {
+        let object = getObjectByID(editor.selected.type, objectID);
+
+        if (object && object.objectListElement) {
+            object.objectListElement.classList.remove("selected");
+        }
+
         if (this.type == SelectionType.CHILD_SHAPE &&
             this.objectID.includes(objectID) &&
             editor.childShapes[objectID].type==PartType.BLOCK) {
