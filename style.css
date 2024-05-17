@@ -22,6 +22,7 @@ mark {
 
 #object_list details {
     padding: 5px;
+    margin: 2px;
     padding-left: 20px;
 }
 
@@ -32,6 +33,7 @@ mark {
 #object_list details:nth-child(odd) {
     background-color: var(--dark-bg);
 }
+
 
 .generic_tab div a {
     filter: brightness(150%);
