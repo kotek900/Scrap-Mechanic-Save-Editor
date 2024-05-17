@@ -19,7 +19,16 @@ export const SelectionType = {
 export let mainSelection;
 
 function changeMainSelection(type, objectID) {
+    let oldSelection = mainSelection;
     mainSelection = getObjectByID(type, objectID);
+
+    if (mainSelection && mainSelection.objectListElement) {
+        mainSelection.objectListElement.classList.add("selected_main");
+    }
+
+    if (oldSelection && oldSelection.objectListElement) {
+        oldSelection.objectListElement.classList.remove("selected_main");
+    }
 }
 
 function getObjectByID(type, objectID) {
@@ -177,6 +186,13 @@ class Editor {
             inputBoxButtons.style.display = "block";
         }
 
+        let object = getObjectByID(type, objectID);
+
+        if (object && object.objectListElement) {
+            object.objectListElement.classList.add("selected");
+        }
+
+
         const infoSelected = document.getElementById("info_selected");
         switch(type) {
         case SelectionType.GAME_INFO:
@@ -260,6 +276,15 @@ class Editor {
     }
 
     deselect() {
+        for (let i=0; i < editor.selected.objectID.length; i++) {
+            let object = getObjectByID(editor.selected.type, editor.selected.objectID[i]);
+
+            if (object && object.objectListElement) {
+                object.objectListElement.classList.remove("selected");
+            }
+        }
+
+
         const infoSelected = document.getElementById("info_selected");
         infoSelected.textContent = "none";
 
