@@ -34,6 +34,17 @@ export class RigidBody {
 
         this.updateRotation();
         editor.scene.add(this.group);
+
+        // add rigid body to object list tab
+        let detailsElement = document.createElement("details");
+        let summaryElement = document.createElement("summary");
+
+        summaryElement.textContent = "Body " + this.id;
+
+        detailsElement.appendChild(summaryElement);
+        object_list.appendChild(detailsElement);
+
+        this.objectListElement = detailsElement;
     }
 
     delete() {
@@ -44,6 +55,8 @@ export class RigidBody {
         }
         const statement = editor.db.prepare("DELETE FROM RigidBody WHERE id = ?;");
         statement.run([this.id]);
+
+        this.objectListElement.remove();
     }
 
     updateDatabase() {

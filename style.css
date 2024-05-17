@@ -20,6 +20,19 @@ mark {
     color: white;
 }
 
+#object_list details {
+    padding: 5px;
+    padding-left: 20px;
+}
+
+#object_list details:nth-child(even) {
+    background-color: var(--bright-bg);
+}
+
+#object_list details:nth-child(odd) {
+    background-color: var(--dark-bg);
+}
+
 .generic_tab div a {
     filter: brightness(150%);
 }
