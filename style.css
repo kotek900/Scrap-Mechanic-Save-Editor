@@ -133,11 +133,19 @@ mark {
     text-align: center;
 }
 
-.table_remove {
+#button_mod_list_clear, .table_remove {
     background-color: #751707;
     border: 2px solid #470f05;
     color: white;
+}
+
+.table_remove {
     aspect-ratio: 1;
+}
+
+.table_controlls {
+    margin: 3px;
+    margin-top: 5px;
 }
 
 canvas {
@@ -160,11 +168,11 @@ canvas {
     color: white;
 }
 
-#button_delete:hover, .table_remove:hover {
+#button_delete:hover, .table_remove:hover, #button_mod_list_clear:hover {
     background-color: #851b09;
 }
 
-#button_delete:active, .table_remove:active {
+#button_delete:active, .table_remove:active, #button_mod_list_clear:active {
     background-color: #521005;
 }
 

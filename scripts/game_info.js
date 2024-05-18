@@ -125,8 +125,10 @@ export class GameInfo {
     }
 
     delete() {
-        // clear the mods table
+        clearModsTable();
+    }
 
+    clearModsTable() {
         const tableMods = document.getElementById("table_mods");
         for (let i = 0; i < this.modList.length; i++) {
             table_mods.rows[1].remove();
