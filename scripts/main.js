@@ -215,11 +215,13 @@ button_mod_list_paste.addEventListener('click', async () => {
         if (duplicate) continue;
         editor.gameInfo.addMod(mod.fileId, mod.localId);
     }
+    editor.gameInfo.updateDatabase();
 });
 
 button_mod_list_clear.addEventListener('click', function(evt) {
     editor.gameInfo.clearModsTable();
     editor.gameInfo.modList = [];
+    editor.gameInfo.updateDatabase();
 });
 
 selected_UUID.addEventListener('input', function(evt) {
