@@ -191,8 +191,10 @@ button_mod_list_paste.addEventListener('click', async () => {
     if (navigator && navigator.clipboard) text = await navigator.clipboard.readText();
     else text = prompt("Mod list to paste:");
 
+    let obj;
+
     try {
-        const obj = JSON.parse(text);
+        obj = JSON.parse(text);
     } catch(e) {
         return;
     }
