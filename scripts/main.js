@@ -196,7 +196,15 @@ button_mod_list_paste.addEventListener('click', async () => {
     if (obj.modList) {
         for (let i = 0; i < obj.modList.length; i++) {
             const mod = obj.modList[i];
-            // TODO check if the mod is already in the list
+            let duplicate = false;
+            for (let j = 0; j < editor.gameInfo.modList.length; j++) {
+                // if mod is a duplicate
+                if (editor.gameInfo.modList[j].fileId == mod.fileId && editor.gameInfo.modList[j].localId == mod.localId) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (duplicate) continue;
             editor.gameInfo.addMod(mod.fileId, mod.localId);
         }
     }
