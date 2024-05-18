@@ -125,6 +125,12 @@ class Editor {
 
         const gameData = this.db.exec("SELECT * FROM Game;")[0].values[0];
         this.gameVersion = gameData[0];
+
+        if (this.gameVersion<27) {
+            alert("Incompatible file version! Version: " + this.gameVersion + ". Compatible version: 27")
+            return;
+        }
+
         this.gameTick = gameData[3];
         this.seed = gameData[2];
         this.gameInfo = new GameInfo(gameData);
