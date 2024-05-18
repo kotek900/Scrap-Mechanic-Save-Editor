@@ -226,6 +226,33 @@ button_add_mod.addEventListener('click', function(evt) {
     editor.gameInfo.updateDatabase();
 });
 
+button_mod_list_copy.addEventListener('click', function(evt) {
+    let modList = editor.gameInfo.modList;
+    if (navigator && navigator.clipboard) navigator.clipboard.writeText(JSON.stringify({modList: modList}));
+    else alert(JSON.stringify({modList: modList}));
+});
+
+button_mod_list_paste.addEventListener('click', async () => {
+    let text;
+    if (navigator && navigator.clipboard) text = await navigator.clipboard.readText();
+    else text = prompt("Mod list to paste:");
+
+    const obj = JSON.parse(text);
+
+    if (obj.modList) {
+        for (let i = 0; i < obj.modList.length; i++) {
+            const mod = obj.modList[i];
+            // TODO check if the mod is already in the list
+            editor.gameInfo.addMod(mod.fileId, mod.localId);
+        }
+    }
+});
+
+button_mod_list_clear.addEventListener('click', function(evt) {
+    editor.gameInfo.clearModsTable();
+    editor.gameInfo.modList = [];
+});
+
 selected_UUID.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE || checkInvalidUUID(selected_UUID.value))
         return;
