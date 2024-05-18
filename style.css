@@ -15,6 +15,7 @@
 body {
     margin: 0px;
     background-color: var(--dark-bg);
+    font-family: Verdana, sans-serif;
 }
 
 mark {
