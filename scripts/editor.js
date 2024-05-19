@@ -14,7 +14,8 @@ export const SelectionType = {
     NONE: 0,
     GAME_INFO: 1,
     CHILD_SHAPE: 2,
-    RIGID_BODY: 3
+    RIGID_BODY: 3,
+    JOINT: 4
 };
 
 export let mainSelection;
