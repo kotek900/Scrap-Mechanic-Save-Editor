@@ -148,7 +148,7 @@ class Editor {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
         }
         for (let i = 0; i < jointData.length; i++) {
-            this.jointData[jointData[i][0]] = new Joint(jointData[i]);
+            this.joints[jointData[i][0]] = new Joint(jointData[i]);
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);
