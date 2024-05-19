@@ -29,6 +29,8 @@ mark {
 
 #object_list {
     font-family: Sans-Serif;
+    overflow: scroll;
+    max-height: calc(100vh - 90px);
 }
 
 #object_list details .selected:nth-child(even), #object_list details div .selected:nth-child(even) {

@@ -19,6 +19,7 @@ export class Joint {
         infoElement.textContent = "Joint " + this.id;
 
         this.objectListElement = infoElement;
+        this.objectListElementClone = infoElement.cloneNode(true);
 
         childShapeA.jointIdA.push(this.id);
         childShapeB.jointIdB.push(this.id);
