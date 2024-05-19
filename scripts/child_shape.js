@@ -49,10 +49,19 @@ export class ChildShape {
 
         this.createMesh();
 
+        let infoElement = document.createElement("div");
+        infoElement.textContent = "Shape " + this.id;
+        editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
+        this.objectListElement = infoElement;
+    }
 
-        // add shape to the object list tab
-
+    updateHTML() {
         let containsDetails = false;
+
+        if (this.jointIdA.length>0  ||
+            this.jointIdB.length>0) containsDetails = true;
+
+        let newElement;
 
         if (containsDetails) {
 
@@ -60,11 +69,15 @@ export class ChildShape {
             let summaryElement = document.createElement("summary");
 
             summaryElement.textContent = "Shape " + this.id;
-
             detailsElement.appendChild(summaryElement);
+
+            for (let i = 0; i < this.jointIdA.length; i++) {
+                detailsElement.appendChild(editor.joints[this.jointIdA[i]].objectListElement);
+            }
+
             editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
 
-            this.objectListElement = detailsElement;
+            newElement = detailsElement;
 
         } else {
 
@@ -74,9 +87,11 @@ export class ChildShape {
 
             editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
 
-            this.objectListElement = infoElement;
-
+            newElement = infoElement;
         }
+
+        this.objectListElement.replaceWith(newElement);
+        this.objectListElement = newElement;
     }
 
     delete() {

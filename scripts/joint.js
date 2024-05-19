@@ -15,7 +15,17 @@ export class Joint {
         let childShapeA = editor.childShapes[this.childShapeIdA];
         let childShapeB = editor.childShapes[this.childShapeIdB];
 
+        let infoElement = document.createElement("div");
+        infoElement.textContent = "Joint " + this.id;
+
+        this.objectListElement = infoElement;
+
         childShapeA.jointIdA.push(this.id);
         childShapeB.jointIdB.push(this.id);
+
+        setTimeout(function () {
+            childShapeA.updateHTML();
+            childShapeB.updateHTML();
+        }, 0);
     }
 }
