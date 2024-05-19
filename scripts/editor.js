@@ -320,8 +320,11 @@ class Editor {
         const buttonCreateBlock = document.getElementById("button_create_block");
         buttonCreateBlock.style.display = "none";
 
-        const inputBoxButtons = document.getElementById("input_box_buttons");
-        inputBoxButtons.style.display = "none";
+        const jointAView = document.getElementById("JointA_view");
+        jointAView.style.display = "none";
+
+        const jointBView = document.getElementById("JointB_view");
+        jointBView.style.display = "none";
 
         this.updateSelectedDatabase();
 
