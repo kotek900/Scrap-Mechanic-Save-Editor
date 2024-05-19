@@ -11,5 +11,11 @@ export class Joint {
         this.childShapeIdB = data[2];
 
         this.data = data[3];
+
+        let childShapeA = editor.childShapes[this.childShapeIdA];
+        let childShapeB = editor.childShapes[this.childShapeIdB];
+
+        childShapeA.jointIdA.push(this.id);
+        childShapeB.jointIdB.push(this.id);
     }
 }
