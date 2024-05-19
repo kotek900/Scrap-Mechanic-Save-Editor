@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ChildShape, PartType } from "child_shape";
 import { GameInfo } from "game_info";
 import { RigidBody } from "rigid_body";
+import { Joint } from "joint";
 
 const SQL = await initSqlJs({
     locateFile: file => `https://sql.js.org/dist/${file}`
@@ -101,6 +102,7 @@ class Editor {
         this.selected = new Selection(SelectionType.NONE, 0);
         this.childShapes = [];
         this.rigidBodies = [];
+        this.joints = [];
         this.db = null;
         this.gameInfo = null;
 
@@ -119,6 +121,7 @@ class Editor {
             this.db.close();
         this.rigidBodies.length = 0;
         this.childShapes.length = 0;
+        this.joints.length = 0;
 
         const byteView = new Uint8Array(reader.result);
         this.db = new SQL.Database(byteView);
@@ -137,11 +140,15 @@ class Editor {
 
         const rigidBodyData = this.db.exec("SELECT * FROM RigidBody;")[0].values;
         const childShapeData = this.db.exec("SELECT * FROM ChildShape;")[0].values;
+        const jointData = this.db.exec("SELECT id, childShapeIdA, childShapeIdB, data FROM Joint;")[0].values;
         for (let i = 0; i < rigidBodyData.length; i++) {
             this.rigidBodies[rigidBodyData[i][0]] = new RigidBody(rigidBodyData[i]);
         }
         for (let i = 0; i < childShapeData.length; i++) {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
+        }
+        for (let i = 0; i < jointData.length; i++) {
+            this.jointData[jointData[i][0]] = new Joint(jointData[i]);
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);
