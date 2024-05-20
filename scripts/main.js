@@ -405,6 +405,15 @@ function animate() {
     renderer.render(editor.scene, camera);
 }
 
+
+function animatePreview() {
+    requestAnimationFrame(animatePreview);
+    controlsPreview.update();
+
+
+    rendererPreview.render(editor.scenePreview, cameraPreview);
+}
+
 // Main code
 
 const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
@@ -418,6 +427,19 @@ const canvas = main_view.appendChild(renderer.domElement);
 canvas.setAttribute("tabindex", "0");
 
 const controls = new OrbitControls(camera, canvas);
+
+// preview camera
+const cameraPreview = new THREE.PerspectiveCamera(75, 4/3, 0.1, 1000);
+cameraPreview.far = 20000;
+cameraPreview.position.z = 5;
+
+const rendererPreview = new THREE.WebGLRenderer();
+rendererPreview.setSize(400, 300);
+
+const canvasPreview = object_preview.appendChild(rendererPreview.domElement);
+canvasPreview.setAttribute("tabindex", "0");
+
+const controlsPreview = new OrbitControls(cameraPreview, canvasPreview);
 
 editor.deselect();
 
@@ -448,6 +470,7 @@ main_view.children[1].onclick = function() {
 }
 
 animate();
+animatePreview();
 
 open_file_button.onchange = () => {
     const f = open_file_button.files[0];

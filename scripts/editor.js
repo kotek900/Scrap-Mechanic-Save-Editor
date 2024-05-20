@@ -51,12 +51,18 @@ class Selection {
         this.type = type;
         this.objectID = [objectID];
         changeMainSelection(type, objectID);
+
+        let object = getObjectByID(this.type, objectID);
+        if (object && object.mesh) editor.scenePreview.add(object.mesh.clone());
     }
 
     select(objectID) {
         changeMainSelection(this.type, objectID);
         if (this.objectID.includes(objectID)) return;
         this.objectID.unshift(objectID);
+
+        let object = getObjectByID(this.type, objectID);
+        if (object && object.mesh) editor.scenePreview.add(object.mesh.clone());
     }
 
     toggleSelect(objectID) {
@@ -110,6 +116,9 @@ class Editor {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x7eafec);
 
+        this.scenePreview = new THREE.Scene();
+        this.scenePreview.background = new THREE.Color(0x7eafec);
+
         // Save information
         this.gameVersion = 0;
         this.gameTick = 0;
@@ -117,7 +126,8 @@ class Editor {
     }
 
     afterSaveLoad(reader) {
-        this.prepareScene();
+        this.prepareScene(this.scene);
+        this.prepareScene(this.scenePreview);
         if(this.db)
             this.db.close();
         this.rigidBodies.length = 0;
@@ -155,19 +165,19 @@ class Editor {
         this.selected = new Selection(SelectionType.NONE, 0);
     }
 
-    prepareScene() {
+    prepareScene(scene) {
         // remove all objects from the scene
-        while(this.scene.children.length > 0) {
-            this.scene.remove(this.scene.children[0]);
+        while(scene.children.length > 0) {
+            scene.remove(scene.children[0]);
         }
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
         directionalLight.position.x = 2 / 3;
         directionalLight.position.z = 1 / 3;
-        this.scene.add(directionalLight);
+        scene.add(directionalLight);
 
         const light = new THREE.AmbientLight(0xffffff, 0.5);
-        this.scene.add(light);
+        scene.add(light);
     }
 
     updateSelectedDatabase() {

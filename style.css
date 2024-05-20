@@ -27,6 +27,12 @@ mark {
     color: white;
 }
 
+#object_preview {
+    width: 400px;
+    position: absolute;
+    right: 10px;
+}
+
 #object_list {
     font-family: Sans-Serif;
     overflow: scroll;
