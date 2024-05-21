@@ -45,6 +45,16 @@ function getObjectByID(type, objectID) {
     console.error("invalid type: " + type);
 }
 
+let initalized = false;
+
+function addObjectToPreview(type, objectID) {
+    let object = getObjectByID(type, objectID);
+        if (object && (object.mesh || object.group)) {
+            if (object.mesh) object.meshPreview = object.mesh.clone();
+            if (object.group) object.meshPreview = object.group.clone();
+            editor.scenePreview.add(object.meshPreview);
+        }
+}
 
 class Selection {
     constructor(type, objectID) {
@@ -52,11 +62,12 @@ class Selection {
         this.objectID = [objectID];
         changeMainSelection(type, objectID);
 
-        let object = getObjectByID(this.type, objectID);
-        if (object && object.mesh) {
-            object.meshPreview = object.mesh.clone();
-            editor.scenePreview.add(object.meshPreview);
+        if (initalized) for (let i = 0; i < editor.selected.objectID.length; i++) {
+            let object = getObjectByID(editor.selected.type, editor.selected.objectID[i]);
+            if (object && object.meshPreview) editor.scenePreview.remove(object.meshPreview);
         }
+
+        addObjectToPreview(this.type, objectID);
     }
 
     select(objectID) {
@@ -64,11 +75,7 @@ class Selection {
         if (this.objectID.includes(objectID)) return;
         this.objectID.unshift(objectID);
 
-        let object = getObjectByID(this.type, objectID);
-        if (object && object.mesh) {
-            object.meshPreview = object.mesh.clone();
-            editor.scenePreview.add(object.meshPreview);
-        }
+        addObjectToPreview(this.type, objectID);
     }
 
     toggleSelect(objectID) {
@@ -78,6 +85,8 @@ class Selection {
 
     deselect(objectID) {
         let object = getObjectByID(editor.selected.type, objectID);
+
+        if (object.meshPreview) editor.scenePreview.remove(object.meshPreview);
 
         if (object && object.objectListElement) {
             object.objectListElement.classList.remove("selected");
@@ -129,6 +138,8 @@ class Editor {
         this.gameVersion = 0;
         this.gameTick = 0;
         this.seed = 0;
+
+        initalized = true;
     }
 
     afterSaveLoad(reader) {
