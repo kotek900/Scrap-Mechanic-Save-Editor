@@ -53,7 +53,10 @@ class Selection {
         changeMainSelection(type, objectID);
 
         let object = getObjectByID(this.type, objectID);
-        if (object && object.mesh) editor.scenePreview.add(object.mesh.clone());
+        if (object && object.mesh) {
+            object.meshPreview = object.mesh.clone();
+            editor.scenePreview.add(object.meshPreview);
+        }
     }
 
     select(objectID) {
@@ -62,7 +65,10 @@ class Selection {
         this.objectID.unshift(objectID);
 
         let object = getObjectByID(this.type, objectID);
-        if (object && object.mesh) editor.scenePreview.add(object.mesh.clone());
+        if (object && object.mesh) {
+            object.meshPreview = object.mesh.clone();
+            editor.scenePreview.add(object.meshPreview);
+        }
     }
 
     toggleSelect(objectID) {

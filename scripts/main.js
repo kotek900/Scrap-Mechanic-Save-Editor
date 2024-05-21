@@ -434,7 +434,7 @@ cameraPreview.far = 20000;
 cameraPreview.position.z = 5;
 
 const rendererPreview = new THREE.WebGLRenderer();
-rendererPreview.setSize(400, 300);
+rendererPreview.setSize(800, 600);
 
 const canvasPreview = object_preview.appendChild(rendererPreview.domElement);
 canvasPreview.setAttribute("tabindex", "0");
