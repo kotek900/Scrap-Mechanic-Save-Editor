@@ -33,11 +33,11 @@ mark {
     max-height: calc(100vh - 90px);
 }
 
-#object_list details .selected:nth-child(even), #object_list details div .selected:nth-child(even) {
+#object_list details.selected:nth-child(even), #object_list details div.selected:nth-child(even) {
     background-color: var(--selected-bright);
 }
 
-#object_list details .selected:nth-child(odd), #object_list details div .selected:nth-child(odd) {
+#object_list details.selected:nth-child(odd), #object_list details div.selected:nth-child(odd) {
     background-color: var(--selected-dark);
 }
 
