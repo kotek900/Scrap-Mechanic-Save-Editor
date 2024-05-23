@@ -70,7 +70,6 @@ mark {
 }
 
 summary span, .selectable {
-    width: 100%;
     cursor: copy;
     user-select: none;
 }
