@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { editor } from "editor";
+import { editor, SelectionType } from "editor";
 import { readFloatFromData, writeFloatToData } from "utils";
 
 export class RigidBody {
@@ -38,9 +38,16 @@ export class RigidBody {
         // add rigid body to object list tab
         let detailsElement = document.createElement("details");
         let summaryElement = document.createElement("summary");
+        let textElement = document.createElement("span");
 
-        summaryElement.textContent = "Body " + this.id;
+        textElement.textContent = "Body " + this.id;
 
+        textElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.select(SelectionType.RIGID_BODY, this.id);
+        })
+
+        summaryElement.appendChild(textElement);
         detailsElement.appendChild(summaryElement);
         object_list.appendChild(detailsElement);
 
