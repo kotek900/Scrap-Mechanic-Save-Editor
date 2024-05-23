@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { editor } from "editor";
+import { editor, SelectionType } from "editor";
 import { resourceManager } from "resource_manager";
 import { readUUID, readInt16FromData, writeInt16ToData } from "utils";
 
@@ -51,6 +51,10 @@ export class ChildShape {
 
         let infoElement = document.createElement("div");
         infoElement.textContent = "Shape " + this.id;
+        infoElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.select(SelectionType.CHILD_SHAPE, this.id);
+        })
         editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
         this.objectListElement = infoElement;
     }
@@ -62,13 +66,16 @@ export class ChildShape {
             this.jointIdB.length>0) containsDetails = true;
 
         let newElement;
+        let textElement;
 
         if (containsDetails) {
 
             let detailsElement = document.createElement("details");
             let summaryElement = document.createElement("summary");
 
-            summaryElement.textContent = "Shape " + this.id;
+            textElement = document.createElement("span");
+            textElement.textContent = "Shape " + this.id;
+            summaryElement.appendChild(textElement);
             detailsElement.appendChild(summaryElement);
 
             for (let i = 0; i < this.jointIdA.length; i++) {
@@ -92,7 +99,13 @@ export class ChildShape {
             editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
 
             newElement = infoElement;
+            textElement = infoElement;
         }
+
+        textElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.select(SelectionType.CHILD_SHAPE, this.id);
+        })
 
         this.objectListElement.replaceWith(newElement);
         this.objectListElement = newElement;
