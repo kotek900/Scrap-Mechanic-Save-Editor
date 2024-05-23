@@ -296,6 +296,9 @@ class Editor {
             for (let i = 0; i < object.jointIdA.length; i++) {
                 if (i==0) {
                     JointA_view.style.display = "block";
+                    let labelElement = document.createElement("h3");
+                    labelElement.textContent = "Joints from:";
+                    JointA_view.appendChild(labelElement);
                 }
                 let jointElement = document.createElement("div");
                 jointElement.textContent = "Joint " + object.jointIdA[i];
@@ -305,6 +308,9 @@ class Editor {
             for (let i = 0; i < object.jointIdB.length; i++) {
                 if (i==0) {
                     JointB_view.style.display = "block";
+                    let labelElement = document.createElement("h3");
+                    labelElement.textContent = "Joints to:";
+                    JointB_view.appendChild(labelElement);
                 }
                 let jointElement = document.createElement("div");
                 jointElement.textContent = "Joint " + object.jointIdB[i];
