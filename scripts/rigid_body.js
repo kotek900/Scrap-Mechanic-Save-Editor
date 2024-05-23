@@ -44,7 +44,7 @@ export class RigidBody {
 
         textElement.addEventListener("click", (e) => {
             e.preventDefault();
-            editor.select(SelectionType.RIGID_BODY, this.id);
+            editor.toggleSelect(SelectionType.RIGID_BODY, this.id);
         })
 
         summaryElement.appendChild(textElement);

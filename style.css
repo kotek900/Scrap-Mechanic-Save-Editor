@@ -69,6 +69,12 @@ mark {
     background-color: var(--dark-bg);
 }
 
+summary span, .selectable {
+    width: 100%;
+    cursor: copy;
+    user-select: none;
+}
+
 
 .generic_tab div a {
     filter: brightness(150%);

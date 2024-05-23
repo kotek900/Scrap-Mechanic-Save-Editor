@@ -53,8 +53,9 @@ export class ChildShape {
         infoElement.textContent = "Shape " + this.id;
         infoElement.addEventListener("click", (e) => {
             e.preventDefault();
-            editor.select(SelectionType.CHILD_SHAPE, this.id);
+            editor.toggleSelect(SelectionType.CHILD_SHAPE, this.id);
         })
+        infoElement.classList.add("selectable");
         editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
         this.objectListElement = infoElement;
     }
@@ -96,6 +97,8 @@ export class ChildShape {
 
             infoElement.textContent = "Shape " + this.id;
 
+            infoElement.classList.add("selectable");
+
             editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
 
             newElement = infoElement;
@@ -104,7 +107,7 @@ export class ChildShape {
 
         textElement.addEventListener("click", (e) => {
             e.preventDefault();
-            editor.select(SelectionType.CHILD_SHAPE, this.id);
+            editor.toggleSelect(SelectionType.CHILD_SHAPE, this.id);
         })
 
         this.objectListElement.replaceWith(newElement);
