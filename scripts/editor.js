@@ -251,42 +251,66 @@ class Editor {
             const childShapeMenu = document.getElementById("ChildShape_menu");
             childShapeMenu.style.display = "block";
 
-            infoSelected.textContent = this.childShapes[objectID].type + " ID: " + objectID;
+            let object = this.childShapes[objectID];
+
+            infoSelected.textContent = object.type + " ID: " + objectID;
 
             const buttonSelectBody = document.getElementById("button_select_body");
             buttonSelectBody.style.display = "inline-block";
 
             //size only applies to blocks and not parts
             const inputSize = document.getElementById("input_size");
-            if (this.childShapes[objectID].type==PartType.BLOCK) {
+            if (object.type==PartType.BLOCK) {
                 inputSize.style.display = "block";
 
                 const inputSizeX = document.getElementById("input_size_x");
-                input_size_x.value = this.childShapes[objectID].size.x;
+                input_size_x.value = object.size.x;
 
                 const inputSizeY = document.getElementById("input_size_y");
-                inputSizeY.value = this.childShapes[objectID].size.y;
+                inputSizeY.value = object.size.y;
 
                 const inputSizeZ = document.getElementById("input_size_z");
-                inputSizeZ.value = this.childShapes[objectID].size.z;
+                inputSizeZ.value = object.size.z;
             } else {
                 inputSize.style.display = "none";
             }
 
             const selectedColorPicker = document.getElementById("selected_color_picker");
-            selectedColorPicker.value = "#" + this.childShapes[objectID].color.toString(16).padStart(6, '0');
+            selectedColorPicker.value = "#" + object.color.toString(16).padStart(6, '0');
 
             const selectedUUID = document.getElementById("selected_UUID");
-            selectedUUID.value = this.childShapes[objectID].uuid;
+            selectedUUID.value = object.uuid;
 
             const inputPositionX = document.getElementById("input_position_x");
-            inputPositionX.value = this.childShapes[objectID].position.x;
+            inputPositionX.value = object.position.x;
 
             const inputPositionY = document.getElementById("input_position_y");
-            inputPositionY.value = this.childShapes[objectID].position.y;
+            inputPositionY.value = object.position.y;
 
             const inputPositionZ = document.getElementById("input_position_z");
-            inputPositionZ.value = this.childShapes[objectID].position.z;
+            inputPositionZ.value = object.position.z;
+
+            JointA_view.innerHTML = "";
+            JointB_view.innerHTML = "";
+
+            for (let i = 0; i < object.jointIdA.length; i++) {
+                if (i==0) {
+                    JointA_view.style.display = "block";
+                }
+                let jointElement = document.createElement("div");
+                jointElement.textContent = "Joint " + object.jointIdA[i];
+                JointA_view.appendChild(jointElement);
+            }
+
+            for (let i = 0; i < object.jointIdB.length; i++) {
+                if (i==0) {
+                    JointB_view.style.display = "block";
+                }
+                let jointElement = document.createElement("div");
+                jointElement.textContent = "Joint " + object.jointIdB[i];
+                JointB_view.appendChild(jointElement);
+            }
+
             break;
         case SelectionType.RIGID_BODY:
             const rigidBodyMenu = document.getElementById("RigidBody_menu");
