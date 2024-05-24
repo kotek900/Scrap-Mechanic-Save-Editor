@@ -137,7 +137,7 @@ window.addEventListener('resize', function() {
 });
 
 window.addEventListener("cut", function(event) {
-    if (document.activeElement!=canvas)
+    if (document.activeElement!=canvas && current_tab!="object_list_view")
         return;
     copyElement(event);
     if (editor.selected.type==SelectionType.CHILD_SHAPE)
@@ -145,13 +145,13 @@ window.addEventListener("cut", function(event) {
 });
 
 window.addEventListener("copy", function(event) {
-    if (document.activeElement!=canvas)
+    if (document.activeElement!=canvas && current_tab!="object_list_view")
         return;
     copyElement(event);
 });
 
 window.addEventListener("paste", function(event) {
-    if(document.activeElement!=canvas)
+    if(document.activeElement!=canvas && current_tab!="object_list_view")
         return;
 
     if(editor.selected.type==SelectionType.CHILD_SHAPE || editor.selected.type==SelectionType.RIGID_BODY) {
