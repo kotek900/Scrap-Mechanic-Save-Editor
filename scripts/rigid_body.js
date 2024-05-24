@@ -82,8 +82,9 @@ export class RigidBody {
     }
 
     removeChildShape(id) {
-        let index = this.childShapes.find((element) => element == id);
-        this.childShapes.splice(index, 1);
+        this.childShapes.filter(function (shapeID) {
+            return shapeID != id;
+        });
     }
 
     updatePosition() {
