@@ -206,8 +206,9 @@ button_delete.addEventListener('click', deleteSelected);
 
 button_select_body.addEventListener('click', function(evt) {
     if(editor.selected.type==SelectionType.CHILD_SHAPE) {
-        let bodyID = mainSelection.bodyID;
-        editor.select(SelectionType.RIGID_BODY, bodyID);
+        const prevSelectedObjects = editor.selected.objectID;
+        for(let i = 0; i<prevSelectedObjects.length; i++)
+            editor.select(SelectionType.RIGID_BODY, editor.childShapes[prevSelectedObjects[i]].bodyID, true);
     }
 });
 
@@ -345,43 +346,43 @@ input_size_z.addEventListener('input', function(evt) {
 input_position_x_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.x = input_position_x_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.x = input_position_x_float.value;
+    mainSelection.updatePosition();
 });
 
 input_position_y_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.y = input_position_y_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.y = input_position_y_float.value;
+    mainSelection.updatePosition();
 });
 
 input_position_z_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.z = input_position_z_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.z = input_position_z_float.value;
+    mainSelection.updatePosition();
 });
 
 input_rotation_x_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.x = input_rotation_x_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.x = input_rotation_x_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 input_rotation_y_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.y = input_rotation_y_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.y = input_rotation_y_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 input_rotation_z_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.z = input_rotation_z_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.z = input_rotation_z_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 function animate() {
