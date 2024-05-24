@@ -1,3 +1,5 @@
+current_tab = "game_info_view";
+
 window.addEventListener("DOMContentLoaded", () => {
   const tabs = document.querySelectorAll('[role="tab"]');
   const tabList = document.querySelector('[role="tablist"]');
@@ -29,4 +31,6 @@ function changeTabs(e) {
   grandparent.parentNode
     .querySelector(`#${target.getAttribute("aria-controls")}`)
     .removeAttribute("hidden");
+
+  current_tab = target.getAttribute('aria-controls');
 }
