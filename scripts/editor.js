@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ChildShape, PartType } from "child_shape";
 import { GameInfo } from "game_info";
 import { RigidBody } from "rigid_body";
+import { Joint } from "joint";
 
 const SQL = await initSqlJs({
     locateFile: file => `https://sql.js.org/dist/${file}`
@@ -13,14 +14,88 @@ export const SelectionType = {
     NONE: 0,
     GAME_INFO: 1,
     CHILD_SHAPE: 2,
-    RIGID_BODY: 3
+    RIGID_BODY: 3,
+    JOINT: 4
 };
+
+export let mainSelection;
+
+function changeMainSelection(type, objectID) {
+    let oldSelection = mainSelection;
+    mainSelection = getObjectByID(type, objectID);
+
+    if (mainSelection && mainSelection.objectListElement) {
+        mainSelection.objectListElement.classList.add("selected_main");
+    }
+
+    if (oldSelection && oldSelection.objectListElement) {
+        oldSelection.objectListElement.classList.remove("selected_main");
+    }
+}
+
+function getObjectByID(type, objectID) {
+    switch(type) {
+    case SelectionType.CHILD_SHAPE:
+        return editor.childShapes[objectID];
+    case SelectionType.RIGID_BODY:
+        return editor.rigidBodies[objectID];
+    case SelectionType.NONE:
+        return;
+    }
+    console.error("invalid type: " + type);
+}
+
 
 class Selection {
     constructor(type, objectID) {
         this.type = type;
-        this.objectID = objectID;
+        this.objectID = [objectID];
+        changeMainSelection(type, objectID);
     }
+
+    select(objectID) {
+        changeMainSelection(this.type, objectID);
+        if (this.objectID.includes(objectID)) return;
+        this.objectID.unshift(objectID);
+    }
+
+    toggleSelect(objectID) {
+        if (this.objectID.includes(objectID)) this.deselect(objectID);
+        else editor.select(this.type, objectID, true);
+    }
+
+    deselect(objectID) {
+        let object = getObjectByID(editor.selected.type, objectID);
+
+        if (object && object.objectListElement) {
+            object.objectListElement.classList.remove("selected");
+        }
+
+        if (this.type == SelectionType.CHILD_SHAPE &&
+            this.objectID.includes(objectID) &&
+            editor.childShapes[objectID].type==PartType.BLOCK) {
+                resetColor(editor.childShapes[objectID]);
+        }
+
+        this.objectID = this.objectID.filter(function (id) {
+            return id != objectID;
+        });
+
+        if (this.objectID.length == 0) {
+            // clear the selection
+            editor.deselect();
+            return;
+        }
+
+        // reset the selection
+        if (mainSelection.id == objectID) {
+            editor.select(this.type, this.objectID[0], true);
+        }
+    }
+}
+
+function resetColor(block) {
+    block.mesh.material.color = new THREE.Color(block.color);
 }
 
 class Editor {
@@ -28,6 +103,7 @@ class Editor {
         this.selected = new Selection(SelectionType.NONE, 0);
         this.childShapes = [];
         this.rigidBodies = [];
+        this.joints = [];
         this.db = null;
         this.gameInfo = null;
 
@@ -46,6 +122,7 @@ class Editor {
             this.db.close();
         this.rigidBodies.length = 0;
         this.childShapes.length = 0;
+        this.joints.length = 0;
 
         const byteView = new Uint8Array(reader.result);
         this.db = new SQL.Database(byteView);
@@ -64,12 +141,18 @@ class Editor {
 
         const rigidBodyData = this.db.exec("SELECT * FROM RigidBody;")[0].values;
         const childShapeData = this.db.exec("SELECT * FROM ChildShape;")[0].values;
+        const jointData = this.db.exec("SELECT id, childShapeIdA, childShapeIdB, data FROM Joint;")[0].values;
         for (let i = 0; i < rigidBodyData.length; i++) {
             this.rigidBodies[rigidBodyData[i][0]] = new RigidBody(rigidBodyData[i]);
         }
         for (let i = 0; i < childShapeData.length; i++) {
             this.childShapes[childShapeData[i][0]] = new ChildShape(childShapeData[i]);
         }
+        for (let i = 0; i < jointData.length; i++) {
+            this.joints[jointData[i][0]] = new Joint(jointData[i]);
+        }
+
+        this.selected = new Selection(SelectionType.NONE, 0);
     }
 
     prepareScene() {
@@ -93,10 +176,10 @@ class Editor {
             this.gameInfo.updateDatabase();
             break;
         case SelectionType.CHILD_SHAPE:
-            this.childShapes[this.selected.objectID].updateDatabase();
+            for (let i=0; i < this.selected.objectID.length; i++) this.childShapes[this.selected.objectID[i]].updateDatabase();
             break;
         case SelectionType.RIGID_BODY:
-            this.rigidBodies[this.selected.objectID].updateDatabase();
+            for (let i=0; i < this.selected.objectID.length; i++) this.rigidBodies[this.selected.objectID[i]].updateDatabase();
         case SelectionType.NONE:
             break;
         default:
@@ -106,15 +189,29 @@ class Editor {
         }
     }
 
-    select(type, objectID) {
-        this.deselect();
+    toggleSelect(type, objectID) {
+        if (this.selected.type == type) this.selected.toggleSelect(objectID);
+        else this.select(type, objectID);
+    }
 
-        this.selected = new Selection(type, objectID);
+    select(type, objectID, keepSelection) {
+        if (this.selected.type!=type) keepSelection = false;
+        if (keepSelection!=true) this.deselect();
+
+        if (keepSelection) this.selected.select(objectID);
+        else this.selected = new Selection(type, objectID);
 
         if(type!=SelectionType.NONE && type!=SelectionType.GAME_INFO) {
             const inputBoxButtons = document.getElementById("input_box_buttons");
             inputBoxButtons.style.display = "block";
         }
+
+        let object = getObjectByID(type, objectID);
+
+        if (object && object.objectListElement) {
+            object.objectListElement.classList.add("selected");
+        }
+
 
         const infoSelected = document.getElementById("info_selected");
         switch(type) {
@@ -199,6 +296,15 @@ class Editor {
     }
 
     deselect() {
+        for (let i=0; i < editor.selected.objectID.length; i++) {
+            let object = getObjectByID(editor.selected.type, editor.selected.objectID[i]);
+
+            if (object && object.objectListElement) {
+                object.objectListElement.classList.remove("selected");
+            }
+        }
+
+
         const infoSelected = document.getElementById("info_selected");
         infoSelected.textContent = "none";
 
@@ -214,13 +320,19 @@ class Editor {
         const buttonCreateBlock = document.getElementById("button_create_block");
         buttonCreateBlock.style.display = "none";
 
-        const inputBoxButtons = document.getElementById("input_box_buttons");
-        inputBoxButtons.style.display = "none";
+        const jointAView = document.getElementById("JointA_view");
+        jointAView.style.display = "none";
+
+        const jointBView = document.getElementById("JointB_view");
+        jointBView.style.display = "none";
 
         this.updateSelectedDatabase();
 
-        if (this.selected.type==SelectionType.CHILD_SHAPE && this.childShapes[this.selected.objectID].type==PartType.BLOCK) {
-            this.childShapes[this.selected.objectID].mesh.material.color = new THREE.Color(this.childShapes[this.selected.objectID].color);
+        if (this.selected.type==SelectionType.CHILD_SHAPE) {
+            for (let i=0; i < editor.selected.objectID.length; i++) {
+                if (this.childShapes[this.selected.objectID[i]].type!=PartType.BLOCK) continue;
+                resetColor(this.childShapes[this.selected.objectID[i]]);
+            }
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);

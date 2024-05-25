@@ -12,6 +12,7 @@
             <div role="tablist">
                 <button role="tab" aria-selected="true" aria-controls="game_info_view" id="game_info_tab">Game Info</button>
                 <button role="tab" aria-selected="false" aria-controls="main_view" id="main_view_tab">3D view</button>
+                <button role="tab" aria-selected="false" aria-controls="object_list_view" id="object_list_tab">Object list</button>
                 <button role="tab" aria-selected="false" aria-controls="about_view" id="about_view_tab">About</button>
             </div>
             <a download="world.db" id="save_file_link"><button id="save_file_button">save</button></a>
@@ -68,6 +69,10 @@
                         <br> y: <input type="number" id="input_size_y" min="1" max="255"></input>
                         <br> z: <input type="number" id="input_size_z" min="1" max="255"></input>
                     </div>
+                    <div class="input_box" id="JointA_view">
+                    </div>
+                    <div class="input_box" id="JointB_view">
+                    </div>
                 </div>
                 <div id="RigidBody_menu">
                     <div class="input_box">
@@ -85,7 +90,11 @@
                 </div>
             </div>
         </div>
-        <div id="about_view" role="tabpanel" hidden>
+        <div id="object_list_view" role="tabpanel" class="generic_tab" hidden>
+            <div id="object_list">
+            </div>
+        </div>
+        <div id="about_view" role="tabpanel" class="generic_tab" hidden>
             <div>
                 <h1>About</h1>
                 <h2>Working on files</h2>
@@ -100,6 +109,9 @@
                 <p>Rotate the camera with left click and move it around with right click.</p>
                 <p>Select objects with left click without dragging the mouse.</p>
                 <p>On the right you can see the propeties of the selected object, you can change the color, position, UUID and size of blocks. It's also possible to select the rigid body of blocks and delete objects. To create new blocks you need to select the rigid body and then click the create block button.</p>
+                <h2>Object list</h2>
+                <p>Here you can see all the objects in the world, no matter where they are, you can select multiple objects by clicking on them.</p>
+                <p>Click the arrow next to the object's name to view more objects.</p>
             </div>
             <div>
                 <h2>Links:</h2>
@@ -118,6 +130,7 @@
                     "game_info": "./scripts/game_info.js",
                     "resource_manager": "./scripts/resource_manager.js",
                     "rigid_body": "./scripts/rigid_body.js",
+                    "joint": "./scripts/joint.js",
                     "utils": "./scripts/utils.js"
                 }
             }

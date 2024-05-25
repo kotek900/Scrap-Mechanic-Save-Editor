@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { ChildShape, PartType } from "child_shape";
-import { editor, SelectionType } from "editor";
+import { editor, SelectionType, mainSelection } from "editor";
 
 // Functions
 
@@ -52,7 +52,6 @@ function createChildShape(type, rigidBodyID) {
     info[2] = data;
 
     editor.childShapes[childShapeID] = new ChildShape(info);
-    editor.select(SelectionType.CHILD_SHAPE, childShapeID);
 
     return childShapeID;
 }
@@ -61,31 +60,67 @@ function deleteSelected() {
     const objectID = editor.selected.objectID;
     switch(editor.selected.type) {
     case SelectionType.CHILD_SHAPE:
+        for (let i = 0; i < objectID.length; i++) editor.childShapes[objectID[i]].delete();
         editor.deselect();
-        editor.childShapes[objectID].delete();
         break;
     case SelectionType.RIGID_BODY:
+        for (let i = 0; i < objectID.length; i++) editor.rigidBodies[objectID[i]].delete();
         editor.deselect();
-        editor.rigidBodies[objectID].delete();
     default:
         break;
     }
 }
 
-function copyElement(event) {
-    if(editor.selected.type==SelectionType.CHILD_SHAPE) {
-        const childs = [];
+function objectToJson(object, type) {
+    switch(type) {
+    case SelectionType.CHILD_SHAPE:
+        let child = {};
+        child.color = "#"+object.color.toString(16);
+        child.pos = object.position;
+        child.shapeId = object.uuid;
+        if (object.type==PartType.BLOCK)
+            child.bounds = object.size;
 
-        const childShape = editor.childShapes[editor.selected.objectID];
-        childs[0] = {};
-        childs[0].color = "#"+childShape.color.toString(16);
-        childs[0].pos = childShape.position;
-        childs[0].shapeId = childShape.uuid;
-        if (childShape.type==PartType.BLOCK)
-            childs[0].bounds = childShape.size;
+        return child;
+    case SelectionType.RIGID_BODY:
+        let childs = [];
+        let body = {};
+        for (let i = 0; i < object.childShapes.length; i++) {
+            let childShape = editor.childShapes[object.childShapes[i]];
+
+            childs[i] = objectToJson(childShape, SelectionType.CHILD_SHAPE);
+
+            body = {childs: childs};
+        }
+
+        return body;
+    }
+    console.error("invalid object type: "+type);
+}
+
+function copyElement(event) {
+    switch(editor.selected.type) {
+    case SelectionType.CHILD_SHAPE:
+        let childs = [];
+
+        for (let i = 0; i < editor.selected.objectID.length; i++) {
+            const childShape = editor.childShapes[editor.selected.objectID[i]];
+            childs[i] = objectToJson(childShape, SelectionType.CHILD_SHAPE);
+        }
 
         event.clipboardData.setData("text/plain", JSON.stringify({childs: childs}));
         event.preventDefault();
+        break;
+    case SelectionType.RIGID_BODY:
+        let bodies = [];
+
+        for (let i = 0; i < editor.selected.objectID.length; i++) {
+            bodies[i] = objectToJson(editor.rigidBodies[editor.selected.objectID[i]], SelectionType.RIGID_BODY);
+        }
+
+        event.clipboardData.setData("text/plain", JSON.stringify({bodies: bodies, version: 4}));
+        event.preventDefault();
+        break;
     }
 }
 
@@ -102,7 +137,7 @@ window.addEventListener('resize', function() {
 });
 
 window.addEventListener("cut", function(event) {
-    if (document.activeElement!=canvas)
+    if (document.activeElement!=canvas && current_tab!="object_list_view")
         return;
     copyElement(event);
     if (editor.selected.type==SelectionType.CHILD_SHAPE)
@@ -110,36 +145,47 @@ window.addEventListener("cut", function(event) {
 });
 
 window.addEventListener("copy", function(event) {
-    if (document.activeElement!=canvas)
+    if (document.activeElement!=canvas && current_tab!="object_list_view")
         return;
     copyElement(event);
 });
 
 window.addEventListener("paste", function(event) {
-    if(document.activeElement!=canvas)
+    if(document.activeElement!=canvas && current_tab!="object_list_view")
         return;
 
     if(editor.selected.type==SelectionType.CHILD_SHAPE || editor.selected.type==SelectionType.RIGID_BODY) {
         event.preventDefault();
         let bodyID = 0;
         let childData;
+        let bodyData;
+        let data;
         try {
             const selectionString = event.clipboardData.getData("text");
-            bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? editor.childShapes[editor.selected.objectID].bodyID : editor.selected.objectID;
-            childData = JSON.parse(selectionString).childs[0];
+            bodyID = editor.selected.type==SelectionType.CHILD_SHAPE ? mainSelection.bodyID : mainSelection.id;
+            data = JSON.parse(selectionString);
+            childData = data.childs;
+            bodyData = data.bodies;
         } catch (e) {
             return;
         }
 
-        const childShapeID = createChildShape(PartType.BLOCK, bodyID);
-        editor.childShapes[childShapeID].color = parseInt(childData.color.slice(1), 16)
-        editor.childShapes[childShapeID].position = childData.pos
-        editor.childShapes[childShapeID].uuid = childData.shapeId
-        editor.childShapes[childShapeID].size = childData.bounds
+        if (bodyData) {
+            console.warn("pasting rigid bodies is unsupported!");
+            return;
+        }
 
-        editor.childShapes[childShapeID].createMesh();
+        for (let i = 0; i < childData.length; i++) {
+            const childShapeID = createChildShape(PartType.BLOCK, bodyID);
+            editor.childShapes[childShapeID].color = parseInt(childData[i].color.slice(1), 16)
+            editor.childShapes[childShapeID].position = childData[i].pos
+            editor.childShapes[childShapeID].uuid = childData[i].shapeId
+            editor.childShapes[childShapeID].size = childData[i].bounds
 
-        editor.select(SelectionType.CHILD_SHAPE, childShapeID);
+            editor.childShapes[childShapeID].createMesh();
+
+            editor.select(SelectionType.CHILD_SHAPE, childShapeID, i!=0);
+        }
     }
 });
 
@@ -160,8 +206,9 @@ button_delete.addEventListener('click', deleteSelected);
 
 button_select_body.addEventListener('click', function(evt) {
     if(editor.selected.type==SelectionType.CHILD_SHAPE) {
-        let bodyID = editor.childShapes[editor.selected.objectID].bodyID;
-        editor.select(SelectionType.RIGID_BODY, bodyID);
+        const prevSelectedObjects = editor.selected.objectID;
+        for(let i = prevSelectedObjects.length-1; i>=0; i--)
+            editor.select(SelectionType.RIGID_BODY, editor.childShapes[prevSelectedObjects[i]].bodyID, true);
     }
 });
 
@@ -227,7 +274,7 @@ button_mod_list_clear.addEventListener('click', function(evt) {
 selected_UUID.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE || checkInvalidUUID(selected_UUID.value))
         return;
-    editor.childShapes[editor.selected.objectID].uuid = selected_UUID.value;
+    mainSelection.uuid = selected_UUID.value;
 });
 
 input_seed.addEventListener('input', function(evt) {
@@ -250,92 +297,92 @@ input_version.addEventListener('input', function(evt) {
 selected_color_picker.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].color = parseInt(selected_color_picker.value.slice(1), 16);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.color = parseInt(selected_color_picker.value.slice(1), 16);
+    mainSelection.createMesh();
 });
 
 input_position_x.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.x = Math.floor(input_position_x.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.x = Math.floor(input_position_x.value);
+    mainSelection.createMesh();
 });
 
 input_position_y.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.y = Math.floor(input_position_y.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.y = Math.floor(input_position_y.value);
+    mainSelection.createMesh();
 });
 
 input_position_z.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.CHILD_SHAPE)
         return;
-    editor.childShapes[editor.selected.objectID].position.z = Math.floor(input_position_z.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.position.z = Math.floor(input_position_z.value);
+    mainSelection.createMesh();
 });
 
 input_size_x.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.x = Math.floor(input_size_x.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.x = Math.floor(input_size_x.value);
+    mainSelection.createMesh();
 });
 
 input_size_y.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.y = Math.floor(input_size_y.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.y = Math.floor(input_size_y.value);
+    mainSelection.createMesh();
 });
 
 input_size_z.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || editor.childShapes[editor.selected.objectID].type!=PartType.BLOCK)
+    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
         return;
-    editor.childShapes[editor.selected.objectID].size.z = Math.floor(input_size_z.value);
-    editor.childShapes[editor.selected.objectID].createMesh();
+    mainSelection.size.z = Math.floor(input_size_z.value);
+    mainSelection.createMesh();
 });
 
 input_position_x_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.x = input_position_x_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.x = input_position_x_float.value;
+    mainSelection.updatePosition();
 });
 
 input_position_y_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.y = input_position_y_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.y = input_position_y_float.value;
+    mainSelection.updatePosition();
 });
 
 input_position_z_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].position.z = input_position_z_float.value;
-    editor.rigidBodies[editor.selected.objectID].updatePosition();
+    mainSelection.position.z = input_position_z_float.value;
+    mainSelection.updatePosition();
 });
 
 input_rotation_x_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.x = input_rotation_x_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.x = input_rotation_x_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 input_rotation_y_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.y = input_rotation_y_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.y = input_rotation_y_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 input_rotation_z_float.addEventListener('input', function(evt) {
     if(editor.selected.type!=SelectionType.RIGID_BODY)
         return;
-    editor.rigidBodies[editor.selected.objectID].rotation.z = input_rotation_z_float.value*Math.PI/180;
-    editor.rigidBodies[editor.selected.objectID].updateRotation();
+    mainSelection.rotation.z = input_rotation_z_float.value*Math.PI/180;
+    mainSelection.updateRotation();
 });
 
 function animate() {
@@ -344,12 +391,16 @@ function animate() {
 
     raycaster.setFromCamera(pointer, camera);
 
-    if (editor.selected.type==SelectionType.CHILD_SHAPE && editor.childShapes[editor.selected.objectID].type==PartType.BLOCK) {
+    if (editor.selected.type==SelectionType.CHILD_SHAPE) {
         const time = new Date();
-        const selectionColor = new THREE.Color("white");
-        selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
-        selectionColor.lerp(new THREE.Color(editor.childShapes[editor.selected.objectID].color), 0.2);
-        editor.childShapes[editor.selected.objectID].mesh.material.color = selectionColor;
+        for (let i=0; i < editor.selected.objectID.length; i++) {
+            const selectionColor = new THREE.Color("white");
+            selectionColor.lerpColors(new THREE.Color(0xded30b), new THREE.Color(0xf28e13), (Math.sin(time.getMilliseconds()/300)+1)/2);
+            let childShape = editor.childShapes[editor.selected.objectID[i]];
+            if (childShape.type!=PartType.BLOCK) continue;
+            selectionColor.lerp(new THREE.Color(childShape.color), 0.2);
+            childShape.mesh.material.color = selectionColor;
+        }
     }
 
     renderer.render(editor.scene, camera);
@@ -392,7 +443,9 @@ main_view.children[1].onclick = function() {
     const intersects = raycaster.intersectObjects(editor.scene.children);
     if (!mouseCanSelectObject || intersects.length == 0 || !intersects[0].object.hasOwnProperty("childShapeID"))
         return;
-    editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
+
+    if (window.event.shiftKey) editor.toggleSelect(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
+    else editor.select(SelectionType.CHILD_SHAPE, intersects[0].object.childShapeID);
 }
 
 animate();

@@ -4,6 +4,12 @@
 
     --bright-blue: #165d81;
     --dark-blue: #12394d;
+
+    --selected-dark-main: #92530b;
+    --selected-bright-main: #958119;
+
+    --selected-dark: #643908;
+    --selected-bright: #6f6119;
 }
 
 body {
@@ -17,15 +23,63 @@ mark {
     background-color: inherit;
 }
 
-#about_view {
+.generic_tab {
     color: white;
 }
 
-#about_view div a {
+#object_list {
+    font-family: Sans-Serif;
+    overflow: scroll;
+    max-height: calc(100vh - 90px);
+}
+
+#object_list details.selected:nth-child(even), #object_list details div.selected:nth-child(even) {
+    background-color: var(--selected-bright);
+}
+
+#object_list details.selected:nth-child(odd), #object_list details div.selected:nth-child(odd) {
+    background-color: var(--selected-dark);
+}
+
+@keyframes selection_main {
+  from {background-color: var(--selected-dark-main);}
+  to {background-color: var(--selected-bright-main);}
+}
+
+.selected_main {
+    animation-name: selection_main;
+    animation-duration: 0.75s;
+    animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate-reverse;
+}
+
+#object_list details, #object_list details div {
+    padding: 5px;
+    margin: 2px;
+    padding-left: 20px;
+    box-shadow: inset 0px 0px 2px black;
+    border-radius: 3px;
+}
+
+#object_list details:nth-child(even), #object_list div:nth-child(even) {
+    background-color: var(--bright-bg);
+}
+
+#object_list details:nth-child(odd), #object_list div:nth-child(odd) {
+    background-color: var(--dark-bg);
+}
+
+summary span, .selectable {
+    cursor: copy;
+    user-select: none;
+}
+
+
+.generic_tab div a {
     filter: brightness(150%);
 }
 
-.input_box, #about_view div {
+.input_box, .generic_tab div {
     background-color: var(--bright-bg);
     margin: 5px;
     padding: 5px;
