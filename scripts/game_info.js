@@ -18,13 +18,13 @@ export class GameInfo {
         for (let i = 0; i < this.modList.length; i++) {
             let fileId = 0;
             for (let j = 0; j < 8; j++) {
-                fileId <<= 8;
-                fileId += this.mods[i*25+4+j];
+                fileId *= 256; //fileId <<= 8; causes an intiger overflow in javascript.
+                fileId += this.mods[i*24+4+j];
             }
 
             this.modList[i] = {
                 fileId: fileId,
-                localId: readUUID(this.mods, i*25+27)
+                localId: readUUID(this.mods, i*24+27)
             };
             this.addModToTable(this.modList[i], i);
         }
