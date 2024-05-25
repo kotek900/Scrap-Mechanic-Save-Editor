@@ -140,8 +140,7 @@ window.addEventListener("cut", function(event) {
     if (document.activeElement!=canvas && current_tab!="object_list_view")
         return;
     copyElement(event);
-    if (editor.selected.type==SelectionType.CHILD_SHAPE)
-        deleteSelected();
+    deleteSelected();
 });
 
 window.addEventListener("copy", function(event) {
