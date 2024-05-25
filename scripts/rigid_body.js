@@ -82,9 +82,10 @@ export class RigidBody {
     }
 
     removeChildShape(id) {
-        this.childShapes.filter(function (shapeID) {
+        this.childShapes = this.childShapes.filter(function (shapeID) {
             return shapeID != id;
         });
+        if (this.childShapes.length == 0) this.delete();
     }
 
     updatePosition() {
