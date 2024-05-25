@@ -88,7 +88,7 @@ export class ChildShape {
                 detailsElement.appendChild(editor.joints[this.jointIdB[i]].objectListElementClone);
             }
 
-            editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
+            if (editor.rigidBodies[this.bodyID]) editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
 
             newElement = detailsElement;
 

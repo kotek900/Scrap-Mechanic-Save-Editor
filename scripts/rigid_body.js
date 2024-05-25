@@ -64,6 +64,8 @@ export class RigidBody {
         const statement = editor.db.prepare("DELETE FROM RigidBody WHERE id = ?;");
         statement.run([this.id]);
 
+        editor.scene.remove(this.group);
+
         this.objectListElement.remove();
     }
 
