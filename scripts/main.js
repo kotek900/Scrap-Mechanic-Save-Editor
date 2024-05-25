@@ -207,7 +207,7 @@ button_delete.addEventListener('click', deleteSelected);
 button_select_body.addEventListener('click', function(evt) {
     if(editor.selected.type==SelectionType.CHILD_SHAPE) {
         const prevSelectedObjects = editor.selected.objectID;
-        for(let i = 0; i<prevSelectedObjects.length; i++)
+        for(let i = prevSelectedObjects.length-1; i>=0; i--)
             editor.select(SelectionType.RIGID_BODY, editor.childShapes[prevSelectedObjects[i]].bodyID, true);
     }
 });
