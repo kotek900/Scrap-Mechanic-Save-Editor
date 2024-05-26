@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import { editor, SelectionType } from "editor";
+import { ColorObjectProperty, UUIDObjectProperty, Vector3ObjectProperty } from "object_property";
 import { resourceManager } from "resource_manager";
 import { readUUID, readInt16FromData, writeInt16ToData } from "utils";
 
@@ -220,5 +221,22 @@ export class ChildShape {
 
         const statement = editor.db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
+    }
+
+    getProperties() {
+        const properties = [
+            new UUIDObjectProperty("UUID", this, "uuid"),
+            new ColorObjectProperty("Color", this, "color", this.createMesh.bind(this)),
+            new Vector3ObjectProperty("Local position", this.position, this.createMesh.bind(this), function(val) {
+                return Math.floor(val);
+            })
+        ];
+        //size only applies to blocks and not parts
+        if(this.type!=PartType.PART) {
+            properties.push(new Vector3ObjectProperty("Size", this.size, this.createMesh.bind(this), function(val) {
+                return Math.floor(val);
+            }, 1, 255));
+        }
+        return properties;
     }
 }

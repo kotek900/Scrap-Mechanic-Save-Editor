@@ -270,12 +270,6 @@ button_mod_list_clear.addEventListener('click', function(evt) {
     editor.gameInfo.updateDatabase();
 });
 
-selected_UUID.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || checkInvalidUUID(selected_UUID.value))
-        return;
-    mainSelection.uuid = selected_UUID.value;
-});
-
 input_seed.addEventListener('input', function(evt) {
     editor.gameInfo.seed = input_seed.value;
     editor.gameInfo.updateDatabase();
@@ -291,97 +285,6 @@ input_version.addEventListener('input', function(evt) {
     editor.gameInfo.saveGameVersion = input_version.value;
     const infoGameVersion = document.getElementById("info_gameversion");
     editor.gameInfo.updateDatabase();
-});
-
-selected_color_picker.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE)
-        return;
-    mainSelection.color = parseInt(selected_color_picker.value.slice(1), 16);
-    mainSelection.createMesh();
-});
-
-input_position_x.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE)
-        return;
-    mainSelection.position.x = Math.floor(input_position_x.value);
-    mainSelection.createMesh();
-});
-
-input_position_y.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE)
-        return;
-    mainSelection.position.y = Math.floor(input_position_y.value);
-    mainSelection.createMesh();
-});
-
-input_position_z.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE)
-        return;
-    mainSelection.position.z = Math.floor(input_position_z.value);
-    mainSelection.createMesh();
-});
-
-input_size_x.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
-        return;
-    mainSelection.size.x = Math.floor(input_size_x.value);
-    mainSelection.createMesh();
-});
-
-input_size_y.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
-        return;
-    mainSelection.size.y = Math.floor(input_size_y.value);
-    mainSelection.createMesh();
-});
-
-input_size_z.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.CHILD_SHAPE || mainSelection.type!=PartType.BLOCK)
-        return;
-    mainSelection.size.z = Math.floor(input_size_z.value);
-    mainSelection.createMesh();
-});
-
-input_position_x_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.position.x = input_position_x_float.value;
-    mainSelection.updatePosition();
-});
-
-input_position_y_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.position.y = input_position_y_float.value;
-    mainSelection.updatePosition();
-});
-
-input_position_z_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.position.z = input_position_z_float.value;
-    mainSelection.updatePosition();
-});
-
-input_rotation_x_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.rotation.x = input_rotation_x_float.value*Math.PI/180;
-    mainSelection.updateRotation();
-});
-
-input_rotation_y_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.rotation.y = input_rotation_y_float.value*Math.PI/180;
-    mainSelection.updateRotation();
-});
-
-input_rotation_z_float.addEventListener('input', function(evt) {
-    if(editor.selected.type!=SelectionType.RIGID_BODY)
-        return;
-    mainSelection.rotation.z = input_rotation_z_float.value*Math.PI/180;
-    mainSelection.updateRotation();
 });
 
 function animate() {

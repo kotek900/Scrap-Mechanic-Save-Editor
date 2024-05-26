@@ -54,40 +54,7 @@
                     <button id="button_create_block">Create block</button>
                     <button id="button_delete">delete object</button>
                 </div>
-                <div id="ChildShape_menu">
-                    <div class="input_box">UUID: <input type="text" id="selected_UUID" size="36" maxlength="36"></input></div>
-                    <div class="input_box">Color: <input type="color" id="selected_color_picker"></input></div>
-                    <div class="input_box">
-                        Local position:
-                        <br> x: <input type="number" id="input_position_z"></input>
-                        <br> y: <input type="number" id="input_position_y"></input>
-                        <br> z: <input type="number" id="input_position_x"></input>
-                    </div>
-                    <div class="input_box" id="input_size">
-                        Size:
-                        <br> x: <input type="number" id="input_size_x" min="1" max="255"></input>
-                        <br> y: <input type="number" id="input_size_y" min="1" max="255"></input>
-                        <br> z: <input type="number" id="input_size_z" min="1" max="255"></input>
-                    </div>
-                    <div class="input_box" id="JointA_view">
-                    </div>
-                    <div class="input_box" id="JointB_view">
-                    </div>
-                </div>
-                <div id="RigidBody_menu">
-                    <div class="input_box">
-                        Position:
-                        <br>x: <input type="number" id="input_position_x_float"></input>
-                        <br>y: <input type="number" id="input_position_y_float"></input>
-                        <br>z: <input type="number" id="input_position_z_float"></input>
-                    </div>
-                    <div class="input_box">
-                        Rotation:
-                        <br>x: <input type="number" id="input_rotation_x_float"></input>
-                        <br>y: <input type="number" id="input_rotation_y_float"></input>
-                        <br>z: <input type="number" id="input_rotation_z_float"></input>
-                    </div>
-                </div>
+                <div id="div_property_view"></div>
             </div>
         </div>
         <div id="object_list_view" role="tabpanel" class="generic_tab" hidden>
@@ -128,9 +95,10 @@
                     "child_shape": "./scripts/child_shape.js",
                     "editor": "./scripts/editor.js",
                     "game_info": "./scripts/game_info.js",
+                    "joint": "./scripts/joint.js",
+                    "object_property": "./scripts/object_property.js",
                     "resource_manager": "./scripts/resource_manager.js",
                     "rigid_body": "./scripts/rigid_body.js",
-                    "joint": "./scripts/joint.js",
                     "utils": "./scripts/utils.js"
                 }
             }

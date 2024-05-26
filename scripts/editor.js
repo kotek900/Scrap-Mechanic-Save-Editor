@@ -214,6 +214,8 @@ class Editor {
 
 
         const infoSelected = document.getElementById("info_selected");
+        const divPropertyView = document.getElementById("div_property_view");
+        let properties;
         switch(type) {
         case SelectionType.GAME_INFO:
             console.warn("GAME_INFO is no longer a valid selection type");
@@ -221,77 +223,31 @@ class Editor {
             infoSelected.textContent = "Game Info";
             break;
         case SelectionType.CHILD_SHAPE:
-            const childShapeMenu = document.getElementById("ChildShape_menu");
-            childShapeMenu.style.display = "block";
-
             infoSelected.textContent = this.childShapes[objectID].type + " ID: " + objectID;
 
             const buttonSelectBody = document.getElementById("button_select_body");
             buttonSelectBody.style.display = "inline-block";
 
-            //size only applies to blocks and not parts
-            const inputSize = document.getElementById("input_size");
-            if (this.childShapes[objectID].type==PartType.BLOCK) {
-                inputSize.style.display = "block";
-
-                const inputSizeX = document.getElementById("input_size_x");
-                input_size_x.value = this.childShapes[objectID].size.x;
-
-                const inputSizeY = document.getElementById("input_size_y");
-                inputSizeY.value = this.childShapes[objectID].size.y;
-
-                const inputSizeZ = document.getElementById("input_size_z");
-                inputSizeZ.value = this.childShapes[objectID].size.z;
-            } else {
-                inputSize.style.display = "none";
-            }
-
-            const selectedColorPicker = document.getElementById("selected_color_picker");
-            selectedColorPicker.value = "#" + this.childShapes[objectID].color.toString(16).padStart(6, '0');
-
-            const selectedUUID = document.getElementById("selected_UUID");
-            selectedUUID.value = this.childShapes[objectID].uuid;
-
-            const inputPositionX = document.getElementById("input_position_x");
-            inputPositionX.value = this.childShapes[objectID].position.x;
-
-            const inputPositionY = document.getElementById("input_position_y");
-            inputPositionY.value = this.childShapes[objectID].position.y;
-
-            const inputPositionZ = document.getElementById("input_position_z");
-            inputPositionZ.value = this.childShapes[objectID].position.z;
+            properties = this.childShapes[objectID].getProperties();
             break;
         case SelectionType.RIGID_BODY:
-            const rigidBodyMenu = document.getElementById("RigidBody_menu");
-            rigidBodyMenu.style.display = "block";
-
             infoSelected.textContent = "Rigid body ID: " + objectID;
 
             const buttonCreateBlock = document.getElementById("button_create_block");
             buttonCreateBlock.style.display = "inline-block";
 
-            const inputPositionXFloat = document.getElementById("input_position_x_float");
-            inputPositionXFloat.value = this.rigidBodies[objectID].position.x;
-
-            const inputPositionYFloat = document.getElementById("input_position_y_float");
-            inputPositionYFloat.value = this.rigidBodies[objectID].position.y;
-
-            const inputPositionZFloat = document.getElementById("input_position_z_float");
-            inputPositionZFloat.value = this.rigidBodies[objectID].position.z;
-
-            const inputRotationXFloat = document.getElementById("input_rotation_x_float");
-            inputRotationXFloat.value = this.rigidBodies[objectID].rotation.x;
-
-            const inputRotationYFloat = document.getElementById("input_rotation_y_float");
-            inputRotationYFloat.value = this.rigidBodies[objectID].rotation.y;
-
-            const inputRotationZFloat = document.getElementById("input_rotation_z_float");
-            inputRotationZFloat.value = this.rigidBodies[objectID].rotation.z;
+            properties = this.rigidBodies[objectID].getProperties();
             break;
         default:
             // assert not reached
             console.assert(false);
             break;
+        }
+        for(const property of properties) {
+            const divInputBox = document.createElement("div");
+            divInputBox.setAttribute("class", "input_box");
+            property.createView(divInputBox);
+            divPropertyView.appendChild(divInputBox);
         }
     }
 
@@ -304,27 +260,17 @@ class Editor {
             }
         }
 
-
         const infoSelected = document.getElementById("info_selected");
         infoSelected.textContent = "none";
 
-        const childShapeMenu = document.getElementById("ChildShape_menu");
-        childShapeMenu.style.display = "none";
-
-        const rigidBodyMenu = document.getElementById("RigidBody_menu");
-        rigidBodyMenu.style.display = "none";
+        const divPropertyView = document.getElementById("div_property_view");
+        divPropertyView.innerHTML = "";
 
         const buttonSelectBody = document.getElementById("button_select_body");
         buttonSelectBody.style.display = "none";
 
         const buttonCreateBlock = document.getElementById("button_create_block");
         buttonCreateBlock.style.display = "none";
-
-        const jointAView = document.getElementById("JointA_view");
-        jointAView.style.display = "none";
-
-        const jointBView = document.getElementById("JointB_view");
-        jointBView.style.display = "none";
 
         this.updateSelectedDatabase();
 
