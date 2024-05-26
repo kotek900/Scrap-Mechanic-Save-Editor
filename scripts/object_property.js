@@ -33,6 +33,28 @@ export class ColorObjectProperty extends ObjectProperty {
     }
 }
 
+export class UUIDObjectProperty extends ObjectProperty {
+    constructor(name, refValue, propName) {
+        super(name, refValue);
+        this.propName = propName;
+    }
+
+    createView(parent) {
+        parent.append(this.name);
+
+        const input = document.createElement("input");
+        input.setAttribute("maxlength", 36);
+        input.setAttribute("type", "text");
+        input.addEventListener("input", this.changeListener.bind(this));
+        input.value = this.refValue[this.propName];
+        parent.appendChild(input);
+    }
+
+    changeListener(event) {
+        this.refValue[this.propName] = event.target.value;
+    }
+}
+
 export class Vector3ObjectProperty extends ObjectProperty {
     constructor(name, refValue, changeCallback, modifier, min, max) {
         super(name, refValue);
