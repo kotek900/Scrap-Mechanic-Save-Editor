@@ -39,11 +39,11 @@ mark {
     max-height: calc(100vh - 90px);
 }
 
-#object_list details .selected:nth-child(even), #object_list details div .selected:nth-child(even) {
+#object_list details.selected:nth-child(even), #object_list details div.selected:nth-child(even) {
     background-color: var(--selected-bright);
 }
 
-#object_list details .selected:nth-child(odd), #object_list details div .selected:nth-child(odd) {
+#object_list details.selected:nth-child(odd), #object_list details div.selected:nth-child(odd) {
     background-color: var(--selected-dark);
 }
 
@@ -73,6 +73,11 @@ mark {
 
 #object_list details:nth-child(odd), #object_list div:nth-child(odd) {
     background-color: var(--dark-bg);
+}
+
+summary span, .selectable {
+    cursor: copy;
+    user-select: none;
 }
 
 
@@ -161,7 +166,7 @@ mark {
 #tool_menu {
     background-color: var(--dark-bg);
     color: white;
-    width: 30%;
+    width: 600px;
     height: calc(100vh - 80px);
     margin: 0 auto;
     float: right;
@@ -208,7 +213,7 @@ canvas {
     float: left;
 }
 
-#selected_UUID, #input_mod_localId {
+.input_box input, #input_mod_localId {
     font: 100% Lucida Console, monospace;
 }
 

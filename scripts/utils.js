@@ -21,6 +21,7 @@ export function readInt16FromData(data, location) {
 export function readUUID(data, location) {
     let uuid = "";
     for (let i = 0; i < 16; i++) {
+        if (data[location-i]==undefined) return undefined;
         uuid += data[location-i].toString(16).padStart(2, '0');
         if (i === 3 || i === 5 || i === 7 || i === 9) {
             uuid += "-";

@@ -21,12 +21,12 @@ export class Joint {
         this.objectListElement = infoElement;
         this.objectListElementClone = infoElement.cloneNode(true);
 
-        childShapeA.jointIdA.push(this.id);
-        childShapeB.jointIdB.push(this.id);
+        if (childShapeA!=undefined) childShapeA.jointIdA.push(this.id);
+        if (childShapeB!=undefined) childShapeB.jointIdB.push(this.id);
 
         setTimeout(function () {
-            childShapeA.updateHTML();
-            childShapeB.updateHTML();
+            if (childShapeA!=undefined) childShapeA.updateHTML();
+            if (childShapeB!=undefined) childShapeB.updateHTML();
         }, 0);
     }
 }

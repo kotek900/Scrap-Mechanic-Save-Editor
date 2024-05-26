@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-import { editor } from "editor";
+import { editor, SelectionType } from "editor";
+import { ColorObjectProperty, UUIDObjectProperty, Vector3ObjectProperty } from "object_property";
 import { resourceManager } from "resource_manager";
 import { readUUID, readInt16FromData, writeInt16ToData } from "utils";
 
@@ -51,6 +52,11 @@ export class ChildShape {
 
         let infoElement = document.createElement("div");
         infoElement.textContent = "Shape " + this.id;
+        infoElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.toggleSelect(SelectionType.CHILD_SHAPE, this.id);
+        })
+        infoElement.classList.add("selectable");
         editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
         this.objectListElement = infoElement;
     }
@@ -62,13 +68,16 @@ export class ChildShape {
             this.jointIdB.length>0) containsDetails = true;
 
         let newElement;
+        let textElement;
 
         if (containsDetails) {
 
             let detailsElement = document.createElement("details");
             let summaryElement = document.createElement("summary");
 
-            summaryElement.textContent = "Shape " + this.id;
+            textElement = document.createElement("span");
+            textElement.textContent = "Shape " + this.id;
+            summaryElement.appendChild(textElement);
             detailsElement.appendChild(summaryElement);
 
             for (let i = 0; i < this.jointIdA.length; i++) {
@@ -79,7 +88,7 @@ export class ChildShape {
                 detailsElement.appendChild(editor.joints[this.jointIdB[i]].objectListElementClone);
             }
 
-            editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
+            if (editor.rigidBodies[this.bodyID]) editor.rigidBodies[this.bodyID].objectListElement.appendChild(detailsElement);
 
             newElement = detailsElement;
 
@@ -89,10 +98,18 @@ export class ChildShape {
 
             infoElement.textContent = "Shape " + this.id;
 
+            infoElement.classList.add("selectable");
+
             editor.rigidBodies[this.bodyID].objectListElement.appendChild(infoElement);
 
             newElement = infoElement;
+            textElement = infoElement;
         }
+
+        textElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.toggleSelect(SelectionType.CHILD_SHAPE, this.id);
+        })
 
         this.objectListElement.replaceWith(newElement);
         this.objectListElement = newElement;
@@ -204,5 +221,22 @@ export class ChildShape {
 
         const statement = editor.db.prepare("UPDATE ChildShape SET data = ? WHERE id = ?;");
         statement.run([this.data, this.id]);
+    }
+
+    getProperties() {
+        const properties = [
+            new UUIDObjectProperty("UUID", this, "uuid"),
+            new ColorObjectProperty("Color", this, "color", this.createMesh.bind(this)),
+            new Vector3ObjectProperty("Local position", this.position, this.createMesh.bind(this), function(val) {
+                return Math.floor(val);
+            })
+        ];
+        //size only applies to blocks and not parts
+        if(this.type!=PartType.PART) {
+            properties.push(new Vector3ObjectProperty("Size", this.size, this.createMesh.bind(this), function(val) {
+                return Math.floor(val);
+            }, 1, 255));
+        }
+        return properties;
     }
 }

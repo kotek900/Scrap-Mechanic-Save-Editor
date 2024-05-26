@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-import { editor } from "editor";
+import { editor, SelectionType } from "editor";
+import { Vector3ObjectProperty } from "object_property";
 import { readFloatFromData, writeFloatToData } from "utils";
 
 export class RigidBody {
@@ -38,9 +39,16 @@ export class RigidBody {
         // add rigid body to object list tab
         let detailsElement = document.createElement("details");
         let summaryElement = document.createElement("summary");
+        let textElement = document.createElement("span");
 
-        summaryElement.textContent = "Body " + this.id;
+        textElement.textContent = "Body " + this.id;
 
+        textElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            editor.toggleSelect(SelectionType.RIGID_BODY, this.id);
+        })
+
+        summaryElement.appendChild(textElement);
         detailsElement.appendChild(summaryElement);
         object_list.appendChild(detailsElement);
 
@@ -55,6 +63,8 @@ export class RigidBody {
         }
         const statement = editor.db.prepare("DELETE FROM RigidBody WHERE id = ?;");
         statement.run([this.id]);
+
+        editor.scene.remove(this.group);
 
         this.objectListElement.remove();
     }
@@ -75,8 +85,10 @@ export class RigidBody {
     }
 
     removeChildShape(id) {
-        let index = this.childShapes.find((element) => element == id);
-        this.childShapes.splice(index, 1);
+        this.childShapes = this.childShapes.filter(function (shapeID) {
+            return shapeID != id;
+        });
+        if (this.childShapes.length == 0) this.delete();
     }
 
     updatePosition() {
@@ -102,5 +114,14 @@ export class RigidBody {
             this.group.rotateOnWorldAxis(axis, rotationZ+Math.PI);
 
         }
+    }
+
+    getProperties() {
+        return [
+            new Vector3ObjectProperty("Position", this.position, this.updatePosition.bind(this)),
+            new Vector3ObjectProperty("Rotation", this.rotation, this.updateRotation.bind(this), function(val) {
+                return val*Math.PI/180;
+            })
+        ];
     }
 }
