@@ -55,6 +55,7 @@ export class UUIDObjectProperty extends ObjectProperty {
 
         const input = document.createElement("input");
         input.setAttribute("maxlength", 36);
+        input.setAttribute("size", 36);
         input.setAttribute("type", "text");
         input.addEventListener("input", this.changeListener.bind(this));
         input.value = this.refValue[this.propName];

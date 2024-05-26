@@ -160,7 +160,7 @@ summary span, .selectable {
 #tool_menu {
     background-color: var(--dark-bg);
     color: white;
-    width: 30%;
+    width: 600px;
     height: calc(100vh - 80px);
     margin: 0 auto;
     float: right;
@@ -207,7 +207,7 @@ canvas {
     float: left;
 }
 
-#selected_UUID, #input_mod_localId {
+.input_box input, #input_mod_localId {
     font: 100% Lucida Console, monospace;
 }
 

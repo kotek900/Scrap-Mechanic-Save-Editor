@@ -131,9 +131,9 @@ function checkInvalidUUID(uuid) {
 }
 
 window.addEventListener('resize', function() {
-    camera.aspect = (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70);
+    camera.aspect = (window.innerWidth - 610) / (window.innerHeight - 70);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
+    renderer.setSize(window.innerWidth - 610, window.innerHeight - 70);
 });
 
 window.addEventListener("cut", function(event) {
@@ -310,12 +310,12 @@ function animate() {
 
 // Main code
 
-const camera = new THREE.PerspectiveCamera(75, (window.innerWidth * 0.7 - 10) / (window.innerHeight - 70), 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, (window.innerWidth - 610) / (window.innerHeight - 70), 0.1, 1000);
 camera.far = 20000;
 camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth * 0.7 - 10, window.innerHeight - 70);
+renderer.setSize(window.innerWidth - 610, window.innerHeight - 70);
 
 const canvas = main_view.appendChild(renderer.domElement);
 canvas.setAttribute("tabindex", "0");
