@@ -215,7 +215,6 @@ class Editor {
 
         const infoSelected = document.getElementById("info_selected");
         const divPropertyView = document.getElementById("div_property_view");
-        divPropertyView.innerHTML = "";
         let properties;
         switch(type) {
         case SelectionType.GAME_INFO:
@@ -224,45 +223,12 @@ class Editor {
             infoSelected.textContent = "Game Info";
             break;
         case SelectionType.CHILD_SHAPE:
-            const childShapeMenu = document.getElementById("ChildShape_menu");
-            childShapeMenu.style.display = "block";
-
             infoSelected.textContent = this.childShapes[objectID].type + " ID: " + objectID;
 
             const buttonSelectBody = document.getElementById("button_select_body");
             buttonSelectBody.style.display = "inline-block";
 
-            //size only applies to blocks and not parts
-            const inputSize = document.getElementById("input_size");
-            if (this.childShapes[objectID].type==PartType.BLOCK) {
-                inputSize.style.display = "block";
-
-                const inputSizeX = document.getElementById("input_size_x");
-                input_size_x.value = this.childShapes[objectID].size.x;
-
-                const inputSizeY = document.getElementById("input_size_y");
-                inputSizeY.value = this.childShapes[objectID].size.y;
-
-                const inputSizeZ = document.getElementById("input_size_z");
-                inputSizeZ.value = this.childShapes[objectID].size.z;
-            } else {
-                inputSize.style.display = "none";
-            }
-
-            const selectedColorPicker = document.getElementById("selected_color_picker");
-            selectedColorPicker.value = "#" + this.childShapes[objectID].color.toString(16).padStart(6, '0');
-
-            const selectedUUID = document.getElementById("selected_UUID");
-            selectedUUID.value = this.childShapes[objectID].uuid;
-
-            const inputPositionX = document.getElementById("input_position_x");
-            inputPositionX.value = this.childShapes[objectID].position.x;
-
-            const inputPositionY = document.getElementById("input_position_y");
-            inputPositionY.value = this.childShapes[objectID].position.y;
-
-            const inputPositionZ = document.getElementById("input_position_z");
-            inputPositionZ.value = this.childShapes[objectID].position.z;
+            properties = this.childShapes[objectID].getProperties();
             break;
         case SelectionType.RIGID_BODY:
             infoSelected.textContent = "Rigid body ID: " + objectID;
@@ -294,24 +260,17 @@ class Editor {
             }
         }
 
-
         const infoSelected = document.getElementById("info_selected");
         infoSelected.textContent = "none";
 
-        const childShapeMenu = document.getElementById("ChildShape_menu");
-        childShapeMenu.style.display = "none";
+        const divPropertyView = document.getElementById("div_property_view");
+        divPropertyView.innerHTML = "";
 
         const buttonSelectBody = document.getElementById("button_select_body");
         buttonSelectBody.style.display = "none";
 
         const buttonCreateBlock = document.getElementById("button_create_block");
         buttonCreateBlock.style.display = "none";
-
-        const jointAView = document.getElementById("JointA_view");
-        jointAView.style.display = "none";
-
-        const jointBView = document.getElementById("JointB_view");
-        jointBView.style.display = "none";
 
         this.updateSelectedDatabase();
 

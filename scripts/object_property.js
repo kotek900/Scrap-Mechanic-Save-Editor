@@ -33,6 +33,13 @@ export class ColorObjectProperty extends ObjectProperty {
     }
 }
 
+// TODO
+export class JointObjectProperty extends ObjectProperty {
+    constructor(name, refValue) {
+        super(name, refValue);
+    }
+}
+
 export class UUIDObjectProperty extends ObjectProperty {
     constructor(name, refValue, propName) {
         super(name, refValue);
