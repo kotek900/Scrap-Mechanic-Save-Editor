@@ -10,6 +10,29 @@ export class ObjectProperty {
     }
 }
 
+export class ColorObjectProperty extends ObjectProperty {
+    constructor(name, refValue, propName, changeCallback) {
+        super(name, refValue);
+        this.propName = propName;
+        this.changeCallback = changeCallback;
+    }
+
+    createView(parent) {
+        parent.append(this.name);
+
+        const input = document.createElement("input");
+        input.setAttribute("type", "color");
+        input.addEventListener("input", this.changeListener.bind(this));
+        input.value = "#" + this.refValue[this.propName].toString(16).padStart(6, '0')
+        parent.appendChild(input);
+    }
+
+    changeListener(event) {
+        this.refValue[this.propName] = parseInt(event.target.value.slice(1), 16);
+        this.changeCallback();
+    }
+}
+
 export class Vector3ObjectProperty extends ObjectProperty {
     constructor(name, refValue, changeCallback, modifier, min, max) {
         super(name, refValue);
