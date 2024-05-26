@@ -214,6 +214,9 @@ class Editor {
 
 
         const infoSelected = document.getElementById("info_selected");
+        const divPropertyView = document.getElementById("div_property_view");
+        divPropertyView.innerHTML = "";
+        let properties;
         switch(type) {
         case SelectionType.GAME_INFO:
             console.warn("GAME_INFO is no longer a valid selection type");
@@ -262,36 +265,23 @@ class Editor {
             inputPositionZ.value = this.childShapes[objectID].position.z;
             break;
         case SelectionType.RIGID_BODY:
-            const rigidBodyMenu = document.getElementById("RigidBody_menu");
-            rigidBodyMenu.style.display = "block";
-
             infoSelected.textContent = "Rigid body ID: " + objectID;
 
             const buttonCreateBlock = document.getElementById("button_create_block");
             buttonCreateBlock.style.display = "inline-block";
 
-            const inputPositionXFloat = document.getElementById("input_position_x_float");
-            inputPositionXFloat.value = this.rigidBodies[objectID].position.x;
-
-            const inputPositionYFloat = document.getElementById("input_position_y_float");
-            inputPositionYFloat.value = this.rigidBodies[objectID].position.y;
-
-            const inputPositionZFloat = document.getElementById("input_position_z_float");
-            inputPositionZFloat.value = this.rigidBodies[objectID].position.z;
-
-            const inputRotationXFloat = document.getElementById("input_rotation_x_float");
-            inputRotationXFloat.value = this.rigidBodies[objectID].rotation.x;
-
-            const inputRotationYFloat = document.getElementById("input_rotation_y_float");
-            inputRotationYFloat.value = this.rigidBodies[objectID].rotation.y;
-
-            const inputRotationZFloat = document.getElementById("input_rotation_z_float");
-            inputRotationZFloat.value = this.rigidBodies[objectID].rotation.z;
+            properties = this.rigidBodies[objectID].getProperties();
             break;
         default:
             // assert not reached
             console.assert(false);
             break;
+        }
+        for(const property of properties) {
+            const divInputBox = document.createElement("div");
+            divInputBox.setAttribute("class", "input_box");
+            property.createView(divInputBox);
+            divPropertyView.appendChild(divInputBox);
         }
     }
 
@@ -310,9 +300,6 @@ class Editor {
 
         const childShapeMenu = document.getElementById("ChildShape_menu");
         childShapeMenu.style.display = "none";
-
-        const rigidBodyMenu = document.getElementById("RigidBody_menu");
-        rigidBodyMenu.style.display = "none";
 
         const buttonSelectBody = document.getElementById("button_select_body");
         buttonSelectBody.style.display = "none";

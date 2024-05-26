@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import { editor, SelectionType } from "editor";
+import { Vector3ObjectProperty } from "object_property";
 import { readFloatFromData, writeFloatToData } from "utils";
 
 export class RigidBody {
@@ -111,5 +112,14 @@ export class RigidBody {
             this.group.rotateOnWorldAxis(axis, rotationZ+Math.PI);
 
         }
+    }
+
+    getProperties() {
+        return [
+            new Vector3ObjectProperty("Position", this.position, this.updatePosition.bind(this)),
+            new Vector3ObjectProperty("Rotation", this.rotation, this.updateRotation.bind(this), function(val) {
+                return val*Math.PI/180;
+            })
+        ];
     }
 }
