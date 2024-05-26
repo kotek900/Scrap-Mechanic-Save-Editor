@@ -18,7 +18,9 @@ export class ColorObjectProperty extends ObjectProperty {
     }
 
     createView(parent) {
-        parent.append(this.name);
+        const divName = document.createElement("div");
+        divName.append(this.name);
+        parent.appendChild(divName);
 
         const input = document.createElement("input");
         input.setAttribute("type", "color");
@@ -47,7 +49,9 @@ export class UUIDObjectProperty extends ObjectProperty {
     }
 
     createView(parent) {
-        parent.append(this.name);
+        const divName = document.createElement("div");
+        divName.append(this.name);
+        parent.appendChild(divName);
 
         const input = document.createElement("input");
         input.setAttribute("maxlength", 36);
