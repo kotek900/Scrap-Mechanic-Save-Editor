@@ -2,8 +2,9 @@ import * as THREE from 'three';
 
 import { ChildShape, PartType } from "child_shape";
 import { GameInfo } from "game_info";
-import { RigidBody } from "rigid_body";
 import { Joint } from "joint";
+import { RigidBody } from "rigid_body";
+import { SelectionPreview } from "selection_preview";
 
 const SQL = await initSqlJs({
     locateFile: file => `https://sql.js.org/dist/${file}`
@@ -22,7 +23,7 @@ export let mainSelection;
 
 function changeMainSelection(type, objectID) {
     let oldSelection = mainSelection;
-    mainSelection = getObjectByID(type, objectID);
+    mainSelection = editor.getObjectByID(type, objectID);
 
     if (mainSelection && mainSelection.objectListElement) {
         mainSelection.objectListElement.classList.add("selected_main");
@@ -33,41 +34,21 @@ function changeMainSelection(type, objectID) {
     }
 }
 
-function getObjectByID(type, objectID) {
-    switch(type) {
-    case SelectionType.CHILD_SHAPE:
-        return editor.childShapes[objectID];
-    case SelectionType.RIGID_BODY:
-        return editor.rigidBodies[objectID];
-    case SelectionType.NONE:
-        return;
-    }
-    console.error("invalid type: " + type);
-}
-
-let initalized = false;
-
-function addObjectToPreview(type, objectID) {
-    let object = getObjectByID(type, objectID);
-        if (object && (object.mesh || object.group)) {
-            if (object.mesh) object.meshPreview = object.mesh.clone();
-            if (object.group) object.meshPreview = object.group.clone();
-            editor.scenePreview.add(object.meshPreview);
-        }
-}
 
 class Selection {
-    constructor(type, objectID) {
+    constructor(type, objectID, updateMainSelection = true) {
         this.type = type;
         this.objectID = [objectID];
-        changeMainSelection(type, objectID);
 
-        if (initalized) for (let i = 0; i < editor.selected.objectID.length; i++) {
-            let object = getObjectByID(editor.selected.type, editor.selected.objectID[i]);
-            if (object && object.meshPreview) editor.scenePreview.remove(object.meshPreview);
+        if(updateMainSelection) {
+            changeMainSelection(type, objectID);
+            for (let i = 0; i < editor.selected.objectID.length; i++) {
+                let object = editor.getObjectByID(editor.selected.type, editor.selected.objectID[i]);
+                if (object && object.meshPreview) editor.selectionPreview.scene.remove(object.meshPreview);
+            }
+
+            editor.selectionPreview.addObject(this.type, objectID);
         }
-
-        addObjectToPreview(this.type, objectID);
     }
 
     select(objectID) {
@@ -75,7 +56,7 @@ class Selection {
         if (this.objectID.includes(objectID)) return;
         this.objectID.unshift(objectID);
 
-        addObjectToPreview(this.type, objectID);
+        editor.selectionPreview.addObject(this.type, objectID);
     }
 
     toggleSelect(objectID) {
@@ -84,9 +65,9 @@ class Selection {
     }
 
     deselect(objectID) {
-        let object = getObjectByID(editor.selected.type, objectID);
+        let object = editor.getObjectByID(editor.selected.type, objectID);
 
-        if (object.meshPreview) editor.scenePreview.remove(object.meshPreview);
+        if (object.meshPreview) editor.selectionPreview.scene.remove(object.meshPreview);
 
         if (object && object.objectListElement) {
             object.objectListElement.classList.remove("selected");
@@ -121,7 +102,7 @@ function resetColor(block) {
 
 class Editor {
     constructor() {
-        this.selected = new Selection(SelectionType.NONE, 0);
+        this.selected = new Selection(SelectionType.NONE, 0, false);
         this.childShapes = [];
         this.rigidBodies = [];
         this.joints = [];
@@ -130,21 +111,17 @@ class Editor {
 
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x7eafec);
-
-        this.scenePreview = new THREE.Scene();
-        this.scenePreview.background = new THREE.Color(0x7eafec);
+        this.selectionPreview = new SelectionPreview();
 
         // Save information
         this.gameVersion = 0;
         this.gameTick = 0;
         this.seed = 0;
-
-        initalized = true;
     }
 
     afterSaveLoad(reader) {
         this.prepareScene(this.scene);
-        this.prepareScene(this.scenePreview);
+        this.prepareScene(this.selectionPreview.scene);
         if(this.db)
             this.db.close();
         this.rigidBodies.length = 0;
@@ -233,7 +210,7 @@ class Editor {
             inputBoxButtons.style.display = "block";
         }
 
-        let object = getObjectByID(type, objectID);
+        let object = this.getObjectByID(type, objectID);
 
         if (object && object.objectListElement) {
             object.objectListElement.classList.add("selected");
@@ -280,7 +257,7 @@ class Editor {
 
     deselect() {
         for (let i=0; i < editor.selected.objectID.length; i++) {
-            let object = getObjectByID(editor.selected.type, editor.selected.objectID[i]);
+            let object = this.getObjectByID(this.selected.type, this.selected.objectID[i]);
 
             if (object && object.objectListElement) {
                 object.objectListElement.classList.remove("selected");
@@ -309,6 +286,18 @@ class Editor {
         }
 
         this.selected = new Selection(SelectionType.NONE, 0);
+    }
+
+    getObjectByID(type, objectID) {
+        switch(type) {
+        case SelectionType.CHILD_SHAPE:
+            return this.childShapes[objectID];
+        case SelectionType.RIGID_BODY:
+            return this.rigidBodies[objectID];
+        case SelectionType.NONE:
+            return;
+        }
+        console.error("invalid type: " + type);
     }
 }
 
