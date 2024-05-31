@@ -34,7 +34,6 @@ function changeMainSelection(type, objectID) {
     }
 }
 
-
 class Selection {
     constructor(type, objectID, updateMainSelection = true) {
         this.type = type;
@@ -67,7 +66,7 @@ class Selection {
     deselect(objectID) {
         let object = editor.getObjectByID(editor.selected.type, objectID);
 
-        if (object.meshPreview) editor.selectionPreview.scene.remove(object.meshPreview);
+        if (object.meshPreview) editor.selectionPreview.removeObject(object);
 
         if (object && object.objectListElement) {
             object.objectListElement.classList.remove("selected");
